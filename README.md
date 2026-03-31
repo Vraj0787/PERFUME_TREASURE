@@ -1,97 +1,178 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Perfume Treasure
 
-# Getting Started
+React Native mobile app for the `Perfume Treasure` login, signup, and home flow.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## What Is Included
 
-## Step 1: Start Metro
+- Login screen
+- Signup screen
+- Forgot password demo flow
+- Home screen
+- React Navigation screen flow
+- Black, gold, and ivory perfume-themed UI
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Tech Stack
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- React Native
+- JavaScript
+- React Navigation
+- React Native Safe Area Context
 
-```sh
-# Using npm
-npm start
+## Project Structure
 
-# OR using Yarn
-yarn start
+```text
+Perfume_App/
+├── App.js
+├── index.js
+├── src/
+│   ├── assets/
+│   ├── screens/
+│   └── theme.js
+├── android/
+├── ios/
+├── package.json
+└── README.md
 ```
 
-## Step 2: Build and run your app
+## Prerequisites
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Each teammate should install these first:
 
-### Android
+- Node.js
+- npm
+- Xcode for iOS development
+- Android Studio for Android development
+- CocoaPods for iOS dependencies
+- A running iOS Simulator or Android Emulator, or a physical device
 
-```sh
-# Using npm
-npm run android
+Helpful official setup guide:
 
-# OR using Yarn
-yarn android
+- [React Native environment setup](https://reactnative.dev/docs/environment-setup)
+
+## Clone And Install
+
+```bash
+git clone <your-repo-url>
+cd Perfume_App
+npm install
 ```
 
-### iOS
+## iOS Setup
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+Run this after cloning the project, and any time native dependencies change:
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
+```bash
+cd ios
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+If `bundle install` is not needed on your machine, you can usually run:
 
-```sh
-# Using npm
+```bash
+cd ios
+bundle exec pod install
+cd ..
+```
+
+## Start The App
+
+Start Metro in one terminal:
+
+```bash
+npm start
+```
+
+Keep that terminal open.
+
+### Run On Android
+
+1. Open Android Studio.
+2. Start an emulator from Device Manager, or connect an Android phone with USB debugging enabled.
+3. In a new terminal:
+
+```bash
+cd Perfume_App
+npm run android
+```
+
+### Run On iOS
+
+1. Open Xcode if needed and make sure a simulator is available.
+2. In a new terminal:
+
+```bash
+cd Perfume_App
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Basic Test Flow
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Use this to quickly verify the app after setup:
 
-## Step 3: Modify your app
+1. Open the app on iOS or Android.
+2. On the Login screen, tap `Log In` with empty fields and confirm an alert appears.
+3. Tap `Sign Up`.
+4. Create an account with name, email, password, and confirm password.
+5. Confirm successful signup.
+6. Return to Login and sign in with the same credentials.
+7. Confirm the app opens the Home screen.
+8. Tap `Log Out` and confirm it returns to Login.
+9. Tap `Forgot Password?` and test the demo reset flow.
 
-Now that you have successfully run the app, let's make changes!
+## Useful Commands
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+```bash
+npm start
+npm run android
+npm run ios
+npm test -- --runInBand
+npm run lint
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Troubleshooting
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+### iOS build issues
 
-## Congratulations! :tada:
+Try:
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
+cd ios
+bundle exec pod install
+cd ..
+npm run ios
+```
 
-### Now what?
+### Android build issues
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Check:
 
-# Troubleshooting
+- Android Studio is installed
+- An emulator is already running
+- Android SDK is configured correctly
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Then rerun:
 
-# Learn More
+```bash
+npm run android
+```
 
-To learn more about React Native, take a look at the following resources:
+### Metro cache issues
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+If Metro gets stuck, stop it and restart:
+
+```bash
+npm start -- --reset-cache
+```
+
+## Notes For The Team
+
+- Do not commit `node_modules/`
+- Keep `package-lock.json` checked in
+- After dependency changes, run `npm install`
+- After native iOS dependency changes, run `bundle exec pod install` inside `ios/`
+
+## Current Auth State
+
+The current app is using the demo flow for auth-related screens. If the team decides to move to real authentication later, the recommended next step is Supabase Auth with deep linking for password reset.
