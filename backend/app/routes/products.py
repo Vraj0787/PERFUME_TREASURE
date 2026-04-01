@@ -17,7 +17,7 @@ def list_products():
     sort_by = request.args.get("sort", "featured")
     featured_only = request.args.get("featured")
 
-    if category_slug:
+    if category_slug and category_slug != "shop-all":
         category = Category.query.filter_by(slug=category_slug).first()
         if not category:
             return success_response([])

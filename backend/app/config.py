@@ -7,8 +7,13 @@ load_dotenv()
 
 
 class Config:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret-key")
+    ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     _mysql_password = quote_plus(os.getenv("MYSQL_PASSWORD", "password"))
     SQLALCHEMY_DATABASE_URI = (

@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero">
+    <div class="eyebrow">PERFUME TREASURE</div>
+    <h1>{{ title }}</h1>
+    <p>Create or update product details used by both the app and website.</p>
+  </div>
+
+  <div class="card">
+    <form method="post" action="{{ action_url }}" enctype="multipart/form-data">
+      <div class="grid two">
+        <div class="field">
+          <label for="category_id">CATEGORY</label>
+          <select id="category_id" name="category_id">
+            <option value="">Select a category</option>
+            {% for category in categories %}
+              <option value="{{ category.id }}" {% if product and product.category_id == category.id %}selected{% endif %}>
+                {{ category.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="name">NAME</label>
+          <input id="name" name="name" type="text" value="{{ product.name if product else '' }}" required />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="slug">SLUG</label>
+          <input id="slug" name="slug" type="text" value="{{ product.slug if product else '' }}" />
+        </div>
+        <div class="field">
+          <label for="image_url">IMAGE URL</label>
+          <input id="image_url" name="image_url" type="url" value="{{ image_url }}" />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="image_file">UPLOAD IMAGE</label>
+          <input id="image_file" name="image_file" type="file" accept="image/*" />
+        </div>
+        <div class="field">
+          <label>CURRENT PREVIEW</label>
+          {% if image_preview_url %}
+            <img src="{{ image_preview_url }}" alt="Product preview" style="width:120px; height:120px; object-fit:cover; border-radius:16px; border:1px solid var(--border);" />
+          {% else %}
+            <div style="width:120px; height:120px; border-radius:16px; border:1px dashed var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-muted); background:white;">No image</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="description">DESCRIPTION</label>
+        <textarea id="description" name="description" rows="5" required>{{ product.description if product else '' }}</textarea>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="price">PRICE</label>
+          <input id="price" name="price" type="number" step="0.01" value="{{ product.price if product else '' }}" required />
+        </div>
+        <div class="field">
+          <label for="compare_at_price">COMPARE AT PRICE</label>
+          <input id="compare_at_price" name="compare_at_price" type="number" step="0.01" value="{{ product.compare_at_price if product and product.compare_at_price else '' }}" />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="stock_quantity">STOCK QUANTITY</label>
+          <input id="stock_quantity" name="stock_quantity" type="number" min="0" value="{{ product.stock_quantity if product else 0 }}" required />
+        </div>
+        <div class="field" style="display: flex; gap: 18px; align-items: center; padding-top: 28px;">
+          <label style="display:flex; align-items:center; gap:8px; margin:0; letter-spacing:0;">
+            <input type="checkbox" name="is_featured" {% if not product or product.is_featured %}checked{% endif %}/>
+            Featured
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; margin:0; letter-spacing:0;">
+            <input type="checkbox" name="is_active" {% if not product or product.is_active %}checked{% endif %}/>
+            Active
+          </label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Save Product</button>
+        <a class="button secondary" href="{{ url_for('admin.dashboard') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

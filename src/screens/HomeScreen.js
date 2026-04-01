@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,7 @@ function HomeScreen({navigation, route, cartCount}) {
   const [categoryCards, setCategoryCards] = useState([]);
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -86,24 +88,30 @@ function HomeScreen({navigation, route, cartCount}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.topBar}>
-          <View style={styles.brandWrap}>
-            <Image source={logoImage} style={styles.logo} resizeMode="contain" />
-            <View>
-              <Text style={styles.brandName}>PERFUME TREASURE</Text>
-              <Text style={styles.brandTag}>Fine Fragrances</Text>
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={() => setMenuVisible(true)}
+              style={({pressed}) => [
+                styles.menuButton,
+                pressed ? styles.menuButtonPressed : null,
+              ]}>
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+            </Pressable>
+            <View style={styles.cartPill}>
+              <Text style={styles.cartText}>Cart {cartCount}</Text>
             </View>
           </View>
           <View style={styles.statusRow}>
             <View style={styles.statusPill}>
               <Text style={styles.statusText}>Signed In</Text>
             </View>
-            <View style={styles.cartPill}>
-              <Text style={styles.cartText}>Cart {cartCount}</Text>
-            </View>
           </View>
         </View>
 
-        <View style={styles.hero}>
+        <View style={styles.brandShowcase}>
+          <Image source={logoImage} style={styles.heroLogo} resizeMode="contain" />
           <Text style={styles.heroEyebrow}>Discover Your</Text>
           <Text style={styles.heroTitle}>Signature Scent</Text>
           <View style={styles.heroDivider} />
@@ -127,7 +135,7 @@ function HomeScreen({navigation, route, cartCount}) {
 
         <Text style={styles.sectionLabel}>SHOP BY CATEGORY</Text>
         <View style={styles.categoryRow}>
-          {categoryCards.map((category, index) => (
+          {categoryCards.map(category => (
             <Pressable
               key={category.title}
               onPress={() =>
@@ -135,7 +143,6 @@ function HomeScreen({navigation, route, cartCount}) {
               }
               style={({pressed}) => [
                 styles.categoryCard,
-                index === categoryCards.length - 1 ? styles.categoryCardFull : null,
                 pressed ? styles.categoryCardPressed : null,
               ]}>
               <Text style={styles.categoryIcon}>{category.icon}</Text>
@@ -192,6 +199,41 @@ function HomeScreen({navigation, route, cartCount}) {
           ))}
         </View>
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}>
+        <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)}>
+          <View style={styles.menuSheet}>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('FAQ');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>FAQ</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('LoyaltyPoints');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Loyalty Points</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Review');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Review</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -213,27 +255,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  brandWrap: {
-    flexDirection: 'row',
+  headerActions: {
+    alignItems: 'flex-start',
+  },
+  statusRow: {
+    alignItems: 'flex-end',
+  },
+  menuButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#7c6330',
+    backgroundColor: '#2a1a16',
     alignItems: 'center',
-    flex: 1,
-    marginRight: 12,
+    justifyContent: 'center',
+    marginBottom: 8,
   },
-  logo: {
-    width: 58,
-    height: 40,
-    marginRight: 10,
+  menuButtonPressed: {
+    opacity: 0.9,
   },
-  brandName: {
-    color: palette.goldSoft,
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-  },
-  brandTag: {
-    color: '#eadcbb',
-    fontSize: 11,
-    marginTop: 1,
+  menuLine: {
+    width: 18,
+    height: 2,
+    borderRadius: 999,
+    backgroundColor: '#f0dfb1',
+    marginVertical: 2,
   },
   statusPill: {
     borderWidth: 1,
@@ -242,16 +289,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  statusRow: {
-    alignItems: 'flex-end',
-  },
   statusText: {
     color: palette.goldSoft,
     fontSize: 12,
     fontWeight: '700',
   },
   cartPill: {
-    marginTop: 8,
+    marginTop: 10,
     borderWidth: 1,
     borderColor: '#7c6330',
     borderRadius: 12,
@@ -264,12 +308,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  hero: {
+  brandShowcase: {
     backgroundColor: palette.black,
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 22,
+    paddingTop: 12,
     paddingBottom: 30,
+  },
+  heroLogo: {
+    width: 250,
+    height: 138,
+    marginBottom: 10,
   },
   heroEyebrow: {
     color: '#eadcbb',
@@ -297,7 +346,7 @@ const styles = StyleSheet.create({
   },
   welcomeCard: {
     marginHorizontal: 14,
-    marginTop: 14,
+    marginTop: 4,
     backgroundColor: palette.cream,
     borderWidth: 1,
     borderColor: palette.gold,
@@ -346,6 +395,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 14,
+    justifyContent: 'space-between',
   },
   categoryCard: {
     width: '48.5%',
@@ -357,9 +407,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#6f5427',
     marginBottom: 10,
-  },
-  categoryCardFull: {
-    width: '100%',
   },
   categoryCardPressed: {
     opacity: 0.9,
@@ -441,6 +488,32 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#8b7d63',
     fontSize: 14,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    paddingTop: 92,
+    paddingHorizontal: 16,
+    alignItems: 'flex-start',
+  },
+  menuSheet: {
+    width: 210,
+    backgroundColor: palette.cream,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.border,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.border,
+  },
+  menuItemText: {
+    color: palette.charcoal,
+    fontSize: 15,
+    fontWeight: '700',
   },
   quickShopWrap: {
     flexDirection: 'row',

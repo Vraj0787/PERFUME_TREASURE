@@ -16,6 +16,7 @@ Flask + MySQL backend for the `Perfume Treasure` mobile app
 - JWT-protected profile lookup
 - Categories API
 - Products API with search and sorting
+- Browser-based admin dashboard
 - Cart API
 - Address API
 - Checkout API
@@ -70,6 +71,12 @@ The API will run on:
 
 ```text
 http://127.0.0.1:5000
+```
+
+Admin dashboard:
+
+```text
+http://127.0.0.1:5000/admin/login
 ```
 
 ## Create Tables Quickly
@@ -142,6 +149,40 @@ Sort values:
 
 - `GET /api/orders`
 - `GET /api/orders/<order_id>`
+
+## Admin Dashboard
+
+The backend includes a simple admin management layer for:
+
+- creating categories
+- editing categories
+- deleting categories
+- creating products
+- editing products
+- deleting products
+- uploading product images
+- inventory updates
+- product active / featured toggles
+- dashboard filters and summary cards
+
+Set these values in `.env`:
+
+```env
+ADMIN_USERNAME=your-admin-username
+ADMIN_PASSWORD=your-admin-password
+```
+
+Then open:
+
+```text
+/admin/login
+```
+
+Uploaded product images are served by the backend at:
+
+```text
+/media/<filename>
+```
 
 ## Example Auth Payloads
 
