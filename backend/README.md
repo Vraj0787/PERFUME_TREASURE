@@ -1,6 +1,6 @@
 # Perfume Treasure Backend
 
-Flask + MySQL backend for the `Perfume Treasure` mobile app and future website.
+Flask + MySQL backend for the `Perfume Treasure` mobile app
 
 ## Stack
 
@@ -169,4 +169,3 @@ Sort values:
 
 - Checkout is currently backend-managed but payment gateway integration is still open for Stripe later.
 - Password reset email flow is not yet implemented in the backend.
-- This backend is designed so both the mobile app and future website can use the same API.
