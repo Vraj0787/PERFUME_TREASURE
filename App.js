@@ -7,6 +7,8 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import HomeScreen from './src/screens/HomeScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import ProductDetailScreen from './src/screens/ProductDetailScreen';
+import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import {palette} from './src/theme';
@@ -27,6 +29,7 @@ const navigationTheme = {
 
 function App() {
   const [registeredUser, setRegisteredUser] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
 
   const handleSignup = userData => {
     setRegisteredUser(userData);
@@ -44,6 +47,27 @@ function App() {
       };
     });
   };
+
+  const handleAddToCart = (product, quantity) => {
+    setCartItems(currentItems => {
+      const existingItem = currentItems.find(item => item.id === product.id);
+
+      if (existingItem) {
+        return currentItems.map(item =>
+          item.id === product.id
+            ? {...item, quantity: item.quantity + quantity}
+            : item,
+        );
+      }
+
+      return [...currentItems, {...product, quantity}];
+    });
+  };
+
+  const cartCount = cartItems.reduce(
+    (totalQuantity, item) => totalQuantity + item.quantity,
+    0,
+  );
 
   return (
     <SafeAreaProvider>
@@ -77,7 +101,20 @@ function App() {
               />
             )}
           </Stack.Screen>
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Home">
+            {props => <HomeScreen {...props} cartCount={cartCount} />}
+          </Stack.Screen>
+          <Stack.Screen name="ProductList">
+            {props => <ProductListScreen {...props} cartCount={cartCount} />}
+          </Stack.Screen>
+          <Stack.Screen name="ProductDetail">
+            {props => (
+              <ProductDetailScreen
+                {...props}
+                onAddToCart={handleAddToCart}
+              />
+            )}
+          </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

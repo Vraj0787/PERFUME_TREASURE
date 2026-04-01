@@ -1,14 +1,83 @@
-import React from 'react';
-import {Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
+import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function HomeScreen({navigation, route}) {
+function HomeScreen({navigation, route, cartCount}) {
   const userName = route.params?.name || 'Guest';
-  const categories = [
-    {icon: '🌸', title: "Women's", note: 'Floral & Soft'},
-    {icon: '🌲', title: "Men's", note: 'Woody & Bold'},
-    {icon: '✨', title: 'Unisex', note: 'Fresh & Unique'},
-  ];
+  const [categoryCards, setCategoryCards] = useState([]);
+  const [featuredProduct, setFeaturedProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadHomeData = async () => {
+      try {
+        const [categoryResponse, featuredResponse] = await Promise.all([
+          fetchCategories(),
+          fetchFeaturedProducts(),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        const iconMap = {
+          Men: '🌲',
+          Women: '🌸',
+          Sets: '🎁',
+          'Shop All': '🛍️',
+        };
+
+        const noteMap = {
+          Men: 'Woody & Bold',
+          Women: 'Floral & Soft',
+          Sets: 'Curated Gifts',
+          'Shop All': 'Entire Collection',
+        };
+
+        setCategoryCards(
+          categoryResponse.map(category => ({
+            icon: iconMap[category.name] || '🛍️',
+            title: category.name,
+            note: noteMap[category.name] || 'Luxury Fragrances',
+          })),
+        );
+        setFeaturedProduct(featuredResponse[0] || null);
+      } catch (_error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setCategoryCards([
+          {icon: '🌲', title: 'Men', note: 'Woody & Bold'},
+          {icon: '🌸', title: 'Women', note: 'Floral & Soft'},
+          {icon: '🎁', title: 'Sets', note: 'Curated Gifts'},
+          {icon: '🛍️', title: 'Shop All', note: 'Entire Collection'},
+        ]);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadHomeData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -24,8 +93,13 @@ function HomeScreen({navigation, route}) {
               <Text style={styles.brandTag}>Fine Fragrances</Text>
             </View>
           </View>
-          <View style={styles.statusPill}>
-            <Text style={styles.statusText}>Signed In</Text>
+          <View style={styles.statusRow}>
+            <View style={styles.statusPill}>
+              <Text style={styles.statusText}>Signed In</Text>
+            </View>
+            <View style={styles.cartPill}>
+              <Text style={styles.cartText}>Cart {cartCount}</Text>
+            </View>
           </View>
         </View>
 
@@ -40,7 +114,9 @@ function HomeScreen({navigation, route}) {
 
         <View style={styles.welcomeCard}>
           <Text style={styles.welcomeTitle}>Welcome back!</Text>
-          <Text style={styles.welcomeEmail}>{route.params?.email || `${userName}@perfume.com`}</Text>
+          <Text style={styles.welcomeEmail}>
+            {route.params?.email || `${userName}@perfume.com`}
+          </Text>
 
           <Pressable
             onPress={() => navigation.replace('Login')}
@@ -51,28 +127,69 @@ function HomeScreen({navigation, route}) {
 
         <Text style={styles.sectionLabel}>SHOP BY CATEGORY</Text>
         <View style={styles.categoryRow}>
-          {categories.map(category => (
-            <View key={category.title} style={styles.categoryCard}>
+          {categoryCards.map((category, index) => (
+            <Pressable
+              key={category.title}
+              onPress={() =>
+                navigation.navigate('ProductList', {category: category.title})
+              }
+              style={({pressed}) => [
+                styles.categoryCard,
+                index === categoryCards.length - 1 ? styles.categoryCardFull : null,
+                pressed ? styles.categoryCardPressed : null,
+              ]}>
               <Text style={styles.categoryIcon}>{category.icon}</Text>
               <Text style={styles.categoryTitle}>{category.title}</Text>
               <Text style={styles.categoryNote}>{category.note}</Text>
-            </View>
+            </Pressable>
           ))}
         </View>
 
         <Text style={styles.sectionLabel}>FEATURED FRAGRANCES</Text>
-        <View style={styles.featureCard}>
-          <View style={styles.featureImage}>
-            <Text style={styles.featureEmoji}>🌹</Text>
+        {loading ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator color={palette.gold} />
           </View>
-          <View style={styles.featureCopy}>
-            <Text style={styles.featureTitle}>Rose Elegante</Text>
-            <Text style={styles.featureMeta}>{"Women's · Floral"}</Text>
-            <Text style={styles.featureDescription}>
-              A timeless bouquet of Bulgarian rose and jasmine.
-            </Text>
-            <Text style={styles.featurePrice}>$89.00</Text>
+        ) : featuredProduct ? (
+          <Pressable
+            onPress={() =>
+              navigation.navigate('ProductDetail', {
+                product: featuredProduct,
+              })
+            }
+            style={({pressed}) => [
+              styles.featureCard,
+              pressed ? styles.featureCardPressed : null,
+            ]}>
+            <Image source={{uri: featuredProduct.image}} style={styles.featureImage} />
+            <View style={styles.featureCopy}>
+              <Text style={styles.featureTitle}>{featuredProduct.name}</Text>
+              <Text style={styles.featureMeta}>{featuredProduct.category}</Text>
+              <Text numberOfLines={2} style={styles.featureDescription}>
+                {featuredProduct.description}
+              </Text>
+              <Text style={styles.featurePrice}>${featuredProduct.price.toFixed(2)}</Text>
+            </View>
+          </Pressable>
+        ) : (
+          <View style={styles.loadingWrap}>
+            <Text style={styles.emptyText}>Featured fragrances will appear here.</Text>
           </View>
+        )}
+
+        <Text style={styles.sectionLabel}>QUICK SHOP</Text>
+        <View style={styles.quickShopWrap}>
+          {categoryCards.map(category => (
+            <Pressable
+              key={category.title}
+              onPress={() => navigation.navigate('ProductList', {category: category.title})}
+              style={({pressed}) => [
+                styles.quickShopChip,
+                pressed ? styles.quickShopChipPressed : null,
+              ]}>
+              <Text style={styles.quickShopText}>{category.title}</Text>
+            </Pressable>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -125,8 +242,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
+  statusRow: {
+    alignItems: 'flex-end',
+  },
   statusText: {
     color: palette.goldSoft,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  cartPill: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#7c6330',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: '#2a1a16',
+  },
+  cartText: {
+    color: '#f0dfb1',
     fontSize: 12,
     fontWeight: '700',
   },
@@ -210,11 +344,11 @@ const styles = StyleSheet.create({
   },
   categoryRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
     paddingHorizontal: 14,
   },
   categoryCard: {
-    width: '31.5%',
+    width: '48.5%',
     backgroundColor: '#2a1a16',
     borderRadius: 12,
     paddingVertical: 16,
@@ -222,6 +356,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#6f5427',
+    marginBottom: 10,
+  },
+  categoryCardFull: {
+    width: '100%',
+  },
+  categoryCardPressed: {
+    opacity: 0.9,
   },
   categoryIcon: {
     fontSize: 22,
@@ -238,6 +379,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textAlign: 'center',
   },
+  featureCardPressed: {
+    opacity: 0.95,
+  },
   featureCard: {
     marginHorizontal: 14,
     backgroundColor: palette.white,
@@ -253,16 +397,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   featureImage: {
-    width: 56,
-    height: 56,
+    width: 72,
+    height: 72,
     borderRadius: 10,
-    backgroundColor: '#251714',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginRight: 14,
-  },
-  featureEmoji: {
-    fontSize: 28,
+    backgroundColor: '#f1e9dc',
   },
   featureCopy: {
     flex: 1,
@@ -287,6 +426,44 @@ const styles = StyleSheet.create({
   featurePrice: {
     color: palette.gold,
     fontSize: 20,
+    fontWeight: '700',
+  },
+  loadingWrap: {
+    marginHorizontal: 14,
+    paddingVertical: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.cream,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  emptyText: {
+    color: '#8b7d63',
+    fontSize: 14,
+  },
+  quickShopWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 14,
+    marginTop: 2,
+  },
+  quickShopChip: {
+    backgroundColor: palette.cream,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  quickShopChipPressed: {
+    opacity: 0.92,
+  },
+  quickShopText: {
+    color: '#6f5f44',
+    fontSize: 13,
     fontWeight: '700',
   },
 });
