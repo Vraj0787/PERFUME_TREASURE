@@ -41,9 +41,13 @@ const FAQScreen = ({navigation}) => {
     {
       question: "Are your perfumes long-lasting?",
       answer: "Yes, our collection includes high-quality perfumes with long-lasting fragrances. However, longevity may vary depending on skin type and application."
-    }
+    },
+    {
+      question: "Can I request a specific perfume if it’s not listed on your website?",
+      answer: "We always strive to expand our collection! If you're looking for a specific perfume, feel free to email us at Info@perfumetreasure.net, and we will do our best to source it for you."
+    },
   ];
-  
+
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
