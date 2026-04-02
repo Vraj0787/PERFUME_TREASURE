@@ -1,3 +1,16 @@
+from flask import request
+
+
+def _absolute_image_url(image_url):
+    if not image_url:
+        return None
+    if image_url.startswith("http://") or image_url.startswith("https://"):
+        return image_url
+    if image_url.startswith("/"):
+        return f"{request.host_url.rstrip('/')}{image_url}"
+    return f"{request.host_url.rstrip('/')}/{image_url}"
+
+
 def serialize_profile(profile):
     return {
         "id": profile.id,
@@ -40,13 +53,13 @@ def serialize_product(product):
         "images": [
             {
                 "id": image.id,
-                "image_url": image.image_url,
+                "image_url": _absolute_image_url(image.image_url),
                 "alt_text": image.alt_text,
                 "sort_order": image.sort_order,
             }
             for image in sorted(product.images, key=lambda image: image.sort_order)
         ],
-        "image": primary_image.image_url if primary_image else None,
+        "image": _absolute_image_url(primary_image.image_url) if primary_image else None,
     }
 
 

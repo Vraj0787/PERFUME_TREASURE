@@ -5,11 +5,14 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import HomeScreen from './src/screens/HomeScreen';
+import FAQScreen from './src/screens/FAQScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
+import ReviewScreen from './src/screens/ReviewScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import {palette} from './src/theme';
 
@@ -115,6 +118,9 @@ function App() {
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="FAQ" component={FAQScreen} />
+          <Stack.Screen name="LoyaltyPoints" component={LoyaltyPointsScreen} />
+          <Stack.Screen name="Review" component={ReviewScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

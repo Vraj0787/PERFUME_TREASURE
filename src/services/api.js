@@ -40,14 +40,27 @@ function mapProduct(product) {
 
 export async function fetchCategories() {
   const response = await request('/categories');
-  const categoryItems = (response.data || []).map(category => ({
+  const orderMap = {
+    Men: 0,
+    Women: 1,
+    Sets: 2,
+    'Shop All': 3,
+  };
+
+  const categoryItems = (response.data || [])
+    .map(category => ({
     id: category.id,
     name: category.name,
     slug: category.slug,
     description: category.description,
-  }));
+    }))
+    .sort((firstCategory, secondCategory) => {
+      return (
+        (orderMap[firstCategory.name] ?? 999) - (orderMap[secondCategory.name] ?? 999)
+      );
+    });
 
-  return [...categoryItems, {id: 'shop-all', name: 'Shop All', slug: 'shop-all'}];
+  return categoryItems;
 }
 
 export async function fetchProducts({category, search = '', sort = 'price_asc'} = {}) {

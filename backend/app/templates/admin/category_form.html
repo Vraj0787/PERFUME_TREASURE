@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero">
+    <div class="eyebrow">PERFUME TREASURE</div>
+    <h1>{{ title }}</h1>
+    <p>Update category details used across the app and website.</p>
+  </div>
+
+  <div class="card">
+    <form method="post" action="{{ action_url }}">
+      <div class="field">
+        <label for="name">NAME</label>
+        <input id="name" name="name" type="text" value="{{ category.name if category else '' }}" required />
+      </div>
+      <div class="field">
+        <label for="slug">SLUG</label>
+        <input id="slug" name="slug" type="text" value="{{ category.slug if category else '' }}" required />
+      </div>
+      <div class="field">
+        <label for="description">DESCRIPTION</label>
+        <textarea id="description" name="description" rows="5">{{ category.description if category and category.description else '' }}</textarea>
+      </div>
+      <div class="actions">
+        <button type="submit">Save Category</button>
+        <a class="button secondary" href="{{ url_for('admin.dashboard') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "Perfume Treasure Admin" }}</title>
+    <style>
+      :root {
+        --black: #121212;
+        --gold: #c9a34a;
+        --gold-soft: #e2c67a;
+        --cream: #f6efe4;
+        --ivory: #fffaf2;
+        --border: #e8d8b3;
+        --text-muted: #7b6b51;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--ivory);
+        color: var(--black);
+      }
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .hero {
+        background: var(--black);
+        color: white;
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+      .eyebrow {
+        color: var(--gold-soft);
+        font-size: 13px;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .hero h1 {
+        margin: 0;
+        font-size: 34px;
+      }
+      .hero p {
+        margin: 8px 0 0;
+        color: #eadcbb;
+      }
+      .card {
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 18px;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .grid.two {
+        grid-template-columns: 1fr 1fr;
+      }
+      .flash {
+        padding: 12px 14px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+        font-weight: 600;
+      }
+      .flash.success {
+        background: #f3ead2;
+        color: #5c4b23;
+      }
+      .flash.error {
+        background: #f7dfdf;
+        color: #8e3333;
+      }
+      .button, button {
+        border: none;
+        border-radius: 14px;
+        background: var(--gold);
+        color: white;
+        font-weight: 700;
+        padding: 12px 16px;
+        cursor: pointer;
+      }
+      .button.secondary {
+        background: var(--black);
+      }
+      input, textarea, select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: white;
+        font: inherit;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 12px 8px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        color: var(--text-muted);
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .inline-form {
+        display: inline;
+      }
+      .top-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .stat-card {
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+      }
+      .stat-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+      }
+      .stat-value {
+        color: var(--black);
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .badge.gold {
+        background: #f2e2b9;
+        color: #6e5521;
+      }
+      .badge.green {
+        background: #dcefdc;
+        color: #2f6b3d;
+      }
+      .badge.red {
+        background: #f6dddd;
+        color: #8b3030;
+      }
+      .filter-form {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr auto;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .stock-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .stock-form input {
+        width: 88px;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      @media (max-width: 900px) {
+        .grid.two {
+          grid-template-columns: 1fr;
+        }
+        .stats,
+        .filter-form {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>

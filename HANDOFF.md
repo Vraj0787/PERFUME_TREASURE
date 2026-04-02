@@ -11,17 +11,17 @@ This handoff covers the parts already completed for:
 
 ## Screens Already Built
 
-- `/Users/vrajpatel/Perfume_App/src/screens/LoginScreen.js`
-- `/Users/vrajpatel/Perfume_App/src/screens/SignupScreen.js`
-- `/Users/vrajpatel/Perfume_App/src/screens/ForgotPasswordScreen.js`
-- `/Users/vrajpatel/Perfume_App/src/screens/ResetPasswordScreen.js`
-- `/Users/vrajpatel/Perfume_App/src/screens/HomeScreen.js`
-- `/Users/vrajpatel/Perfume_App/src/screens/ProductListScreen.js`
-- `/Users/vrajpatel/Perfume_App/src/screens/ProductDetailScreen.js`
+- `src/screens/LoginScreen.js`
+- `src/screens/SignupScreen.js`
+- `src/screens/ForgotPasswordScreen.js`
+- `src/screens/ResetPasswordScreen.js`
+- `src/screens/HomeScreen.js`
+- `src/screens/ProductListScreen.js`
+- `src/screens/ProductDetailScreen.js`
 
 ## Frontend API Layer
 
-- `/Users/vrajpatel/Perfume_App/src/services/api.js`
+- `src/services/api.js`
 
 This file is currently responsible for:
 
@@ -32,7 +32,7 @@ This file is currently responsible for:
 
 ## Backend Location
 
-- `/Users/vrajpatel/Perfume_App/backend`
+- `backend/`
 
 ## Backend Endpoints Ready To Use
 
@@ -107,11 +107,11 @@ Examples:
 
 The backend currently runs from:
 
-- `/Users/vrajpatel/Perfume_App/backend/run.py`
+- `backend/run.py`
 
 Current local API base behavior in:
 
-- `/Users/vrajpatel/Perfume_App/src/services/api.js`
+- `src/services/api.js`
 
 Configured hosts:
 
@@ -140,4 +140,4 @@ Configured hosts:
 - Product browsing on Home and Product List is no longer using local mock arrays.
 - The backend has seed data ready for milestone work.
 - Backend setup instructions are documented in:
-  - `/Users/vrajpatel/Perfume_App/backend/README.md`
+  - `backend/README.md`

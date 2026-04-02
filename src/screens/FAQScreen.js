@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, {useState} from 'react';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {palette} from '../theme';
 
-const FAQScreen = () => {
+const FAQScreen = ({navigation}) => {
   const [openIndex, setOpenIndex] = useState(null);
 
   const faqs = [
@@ -49,13 +50,18 @@ const FAQScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <Pressable onPress={() => navigation.goBack()}>
+        <Text style={styles.backText}>Back</Text>
+      </Pressable>
+      <Text style={styles.eyebrow}>PERFUME TREASURE</Text>
       <Text style={styles.title}>Frequently Asked Questions</Text>
 
       {faqs.map((item, index) => (
-        <View key={index}>
-          <TouchableOpacity onPress={() => toggleFAQ(index)} style={styles.questionBox}>
+        <View key={index} style={styles.itemWrap}>
+          <Pressable onPress={() => toggleFAQ(index)} style={styles.questionBox}>
             <Text style={styles.question}>{item.question}</Text>
-          </TouchableOpacity>
+            <Text style={styles.chevron}>{openIndex === index ? '-' : '+'}</Text>
+          </Pressable>
 
           {openIndex === index && (
             <Text style={styles.answer}>{item.answer}</Text>
@@ -70,23 +76,67 @@ export default FAQScreen;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16
+    flex: 1,
+    backgroundColor: palette.ivory,
+    paddingHorizontal: 18,
+    paddingTop: 46,
+  },
+  backText: {
+    color: palette.gold,
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  eyebrow: {
+    color: palette.gold,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1.4,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16
+    fontSize: 32,
+    fontWeight: '700',
+    color: palette.charcoal,
+    marginBottom: 16,
+  },
+  itemWrap: {
+    marginBottom: 10,
   },
   questionBox: {
-    backgroundColor: '#ddd',
-    padding: 10,
-    marginTop: 8
+    backgroundColor: palette.cream,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   question: {
-    fontWeight: 'bold'
+    fontWeight: '700',
+    color: palette.charcoal,
+    fontSize: 15,
+    flex: 1,
+  },
+  chevron: {
+    color: palette.gold,
+    fontSize: 22,
+    fontWeight: '700',
+    marginLeft: 12,
   },
   answer: {
-    padding: 10
-  }
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: '#7b6b51',
+    fontSize: 14,
+    lineHeight: 22,
+    backgroundColor: palette.white,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+  },
 });
-
