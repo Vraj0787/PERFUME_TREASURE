@@ -43,7 +43,7 @@ const FAQScreen = ({navigation}) => {
       answer: "Yes, our collection includes high-quality perfumes with long-lasting fragrances. However, longevity may vary depending on skin type and application."
     }
   ];
-
+  
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
