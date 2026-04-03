@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -11,6 +12,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {signupUser} from '../services/api';
 import {logoImage, palette} from '../theme';
 
 function SignupScreen({navigation, onSignup}) {
@@ -18,8 +20,9 @@ function SignupScreen({navigation, onSignup}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (
       !name.trim() ||
       !email.trim() ||
@@ -35,11 +38,24 @@ function SignupScreen({navigation, onSignup}) {
       return;
     }
 
+    setLoading(true);
+
     onSignup({
       name: name.trim(),
       email: email.trim(),
       password,
     });
+
+    try {
+      await signupUser({
+        fullName: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
+    } catch (_error) {
+    }
+
+    setLoading(false);
 
     Alert.alert('Signup Successful', 'Your account has been created.', [
       {
@@ -113,8 +129,13 @@ function SignupScreen({navigation, onSignup}) {
 
           <Pressable
             onPress={handleSignup}
-            style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
-            <Text style={styles.buttonText}>Create Account</Text>
+            style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color={palette.white} />
+            ) : (
+              <Text style={styles.buttonText}>Create Account</Text>
+            )}
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('Login')}>

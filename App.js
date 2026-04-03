@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {StatusBar} from 'react-native';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -9,11 +9,16 @@ import FAQScreen from './src/screens/FAQScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
+import CartScreen from './src/screens/CartScreen';
+import CheckoutScreen from './src/screens/CheckoutScreen';
+import OrderConfirmationScreen from './src/screens/OrderConfirmationScreen';
+import OrderHistoryScreen from './src/screens/OrderHistoryScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
 import SignupScreen from './src/screens/SignupScreen';
+import {addCartItem, clearAuthToken, fetchCart} from './src/services/api';
 import {palette} from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -32,7 +37,7 @@ const navigationTheme = {
 
 function App() {
   const [registeredUser, setRegisteredUser] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
 
   const handleSignup = userData => {
     setRegisteredUser(userData);
@@ -51,26 +56,42 @@ function App() {
     });
   };
 
-  const handleAddToCart = (product, quantity) => {
-    setCartItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === product.id);
-
-      if (existingItem) {
-        return currentItems.map(item =>
-          item.id === product.id
-            ? {...item, quantity: item.quantity + quantity}
-            : item,
-        );
-      }
-
-      return [...currentItems, {...product, quantity}];
-    });
+  const updateCartCountFromSnapshot = cartSnapshot => {
+    const itemTotal = (cartSnapshot?.items || []).reduce(
+      (totalQuantity, item) => totalQuantity + item.quantity,
+      0,
+    );
+    setCartCount(itemTotal);
   };
 
-  const cartCount = cartItems.reduce(
-    (totalQuantity, item) => totalQuantity + item.quantity,
-    0,
-  );
+  const refreshCartCount = useCallback(async () => {
+    try {
+      const cartSnapshot = await fetchCart();
+      updateCartCountFromSnapshot(cartSnapshot);
+      return cartSnapshot;
+    } catch (_error) {
+      setCartCount(0);
+      return {items: []};
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshCartCount();
+  }, [refreshCartCount]);
+
+  const handleAddToCart = async (product, quantity) => {
+    await addCartItem(product.id, quantity);
+    await refreshCartCount();
+  };
+
+  const handleDemoLoginSuccess = async () => {
+    await refreshCartCount();
+  };
+
+  const handleLogout = () => {
+    clearAuthToken();
+    setCartCount(0);
+  };
 
   return (
     <SafeAreaProvider>
@@ -85,7 +106,11 @@ function App() {
           }}>
           <Stack.Screen name="Login">
             {props => (
-              <LoginScreen {...props} registeredUser={registeredUser} />
+              <LoginScreen
+                {...props}
+                registeredUser={registeredUser}
+                onDemoLoginSuccess={handleDemoLoginSuccess}
+              />
             )}
           </Stack.Screen>
           <Stack.Screen name="Signup">
@@ -105,7 +130,13 @@ function App() {
             )}
           </Stack.Screen>
           <Stack.Screen name="Home">
-            {props => <HomeScreen {...props} cartCount={cartCount} />}
+            {props => (
+              <HomeScreen
+                {...props}
+                cartCount={cartCount}
+                onLogout={handleLogout}
+              />
+            )}
           </Stack.Screen>
           <Stack.Screen name="ProductList">
             {props => <ProductListScreen {...props} cartCount={cartCount} />}
@@ -118,6 +149,24 @@ function App() {
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="Cart">
+            {props => (
+              <CartScreen
+                {...props}
+                onCartUpdated={updateCartCountFromSnapshot}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Checkout">
+            {props => (
+              <CheckoutScreen
+                {...props}
+                onCartUpdated={updateCartCountFromSnapshot}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
+          <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
           <Stack.Screen name="FAQ" component={FAQScreen} />
           <Stack.Screen name="LoyaltyPoints" component={LoyaltyPointsScreen} />
           <Stack.Screen name="Review" component={ReviewScreen} />

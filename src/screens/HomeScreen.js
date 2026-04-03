@@ -13,7 +13,7 @@ import {
 import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function HomeScreen({navigation, route, cartCount}) {
+function HomeScreen({navigation, route, cartCount, onLogout}) {
   const userName = route.params?.name || 'Guest';
   const [categoryCards, setCategoryCards] = useState([]);
   const [featuredProduct, setFeaturedProduct] = useState(null);
@@ -99,9 +99,11 @@ function HomeScreen({navigation, route, cartCount}) {
               <View style={styles.menuLine} />
               <View style={styles.menuLine} />
             </Pressable>
-            <View style={styles.cartPill}>
+            <Pressable
+              onPress={() => navigation.navigate('Cart')}
+              style={({pressed}) => [styles.cartPill, pressed ? styles.cartPillPressed : null]}>
               <Text style={styles.cartText}>Cart {cartCount}</Text>
-            </View>
+            </Pressable>
           </View>
           <View style={styles.statusRow}>
             <View style={styles.statusPill}>
@@ -127,7 +129,10 @@ function HomeScreen({navigation, route, cartCount}) {
           </Text>
 
           <Pressable
-            onPress={() => navigation.replace('Login')}
+            onPress={() => {
+              onLogout?.();
+              navigation.replace('Login');
+            }}
             style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
             <Text style={styles.buttonText}>Log Out</Text>
           </Pressable>
@@ -231,6 +236,14 @@ function HomeScreen({navigation, route, cartCount}) {
               style={styles.menuItem}>
               <Text style={styles.menuItemText}>Review</Text>
             </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('OrderHistory');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Orders</Text>
+            </Pressable>
           </View>
         </Pressable>
       </Modal>
@@ -302,6 +315,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     backgroundColor: '#2a1a16',
+  },
+  cartPillPressed: {
+    opacity: 0.92,
   },
   cartText: {
     color: '#f0dfb1',

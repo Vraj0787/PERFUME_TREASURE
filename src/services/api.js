@@ -1,18 +1,39 @@
 import {Platform} from 'react-native';
 
 const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
-const API_BASE_URL = `http://${API_HOST}:5001/api`;
+const API_BASE_URL = `http://${API_HOST}:5000/api`;
+
+const MANUAL_DEV_JWT = '';
+let authToken = MANUAL_DEV_JWT;
+
+export function setAuthToken(token) {
+  authToken = token || '';
+}
+
+export function clearAuthToken() {
+  authToken = MANUAL_DEV_JWT;
+}
 
 async function request(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(authToken ? {Authorization: `Bearer ${authToken}`} : {}),
+    ...(options.headers || {}),
+  };
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...headers,
     },
     ...options,
   });
 
-  const data = await response.json();
+  let data = null;
+  try {
+    data = await response.json();
+  } catch (_error) {
+    data = {};
+  }
 
   if (!response.ok) {
     throw new Error(data.message || 'Request failed');
@@ -87,4 +108,120 @@ export async function fetchProducts({category, search = '', sort = 'price_asc'} 
 export async function fetchFeaturedProducts() {
   const response = await request('/products?featured=true');
   return (response.data || []).map(mapProduct);
+}
+
+export async function signupUser({fullName, email, password, phone = ''}) {
+  const response = await request('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({
+      full_name: fullName,
+      email,
+      password,
+      phone,
+    }),
+  });
+
+  const token = response.data?.token || '';
+  if (token) {
+    setAuthToken(token);
+  }
+
+  return response.data;
+}
+
+export async function loginUser({email, password}) {
+  const response = await request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({email, password}),
+  });
+
+  const token = response.data?.token || '';
+  if (token) {
+    setAuthToken(token);
+  }
+
+  return response.data;
+}
+
+export async function fetchCart() {
+  const response = await request('/cart');
+  return response.data || {items: [], totals: {subtotal: 0, shipping_amount: 0, tax_amount: 0, total_amount: 0}};
+}
+
+export async function addCartItem(productId, quantity = 1) {
+  const response = await request('/cart/items', {
+    method: 'POST',
+    body: JSON.stringify({
+      product_id: productId,
+      quantity,
+    }),
+  });
+
+  return response.data;
+}
+
+export async function updateCartItem(itemId, quantity) {
+  const response = await request(`/cart/items/${itemId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({quantity}),
+  });
+
+  return response.data;
+}
+
+export async function removeCartItem(itemId) {
+  await request(`/cart/items/${itemId}`, {method: 'DELETE'});
+}
+
+export async function clearCart() {
+  await request('/cart', {method: 'DELETE'});
+}
+
+export async function fetchAddresses() {
+  const response = await request('/addresses');
+  return response.data || [];
+}
+
+export async function createAddress(payload) {
+  const response = await request('/addresses', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  return response.data;
+}
+
+export async function updateAddress(addressId, payload) {
+  const response = await request(`/addresses/${addressId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+
+  return response.data;
+}
+
+export async function deleteAddress(addressId) {
+  await request(`/addresses/${addressId}`, {method: 'DELETE'});
+}
+
+export async function createCheckout({addressId, paymentMethod = 'cash_on_delivery'}) {
+  const response = await request('/checkout', {
+    method: 'POST',
+    body: JSON.stringify({
+      address_id: addressId,
+      payment_method: paymentMethod,
+    }),
+  });
+
+  return response.data;
+}
+
+export async function fetchOrders() {
+  const response = await request('/orders');
+  return response.data || [];
+}
+
+export async function fetchOrder(orderId) {
+  const response = await request(`/orders/${orderId}`);
+  return response.data;
 }

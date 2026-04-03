@@ -12,9 +12,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {loginUser} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function LoginScreen({navigation, registeredUser}) {
+function LoginScreen({navigation, registeredUser, onDemoLoginSuccess}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ function LoginScreen({navigation, registeredUser}) {
 
     setLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const emailMatches =
         registeredUser.email.toLowerCase() === email.trim().toLowerCase();
       const passwordMatches = registeredUser.password === password;
@@ -43,6 +44,16 @@ function LoginScreen({navigation, registeredUser}) {
         Alert.alert('Invalid Login', 'The email or password you entered is incorrect.');
         return;
       }
+
+      try {
+        await loginUser({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+      } catch (_error) {
+      }
+
+      onDemoLoginSuccess?.();
 
       navigation.replace('Home', {
         name: registeredUser.name,

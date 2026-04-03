@@ -14,6 +14,7 @@ import {palette} from '../theme';
 function ProductDetailScreen({navigation, route, onAddToCart}) {
   const product = route.params?.product;
   const [quantity, setQuantity] = useState(1);
+  const [adding, setAdding] = useState(false);
 
   if (!product) {
     return (
@@ -31,17 +32,28 @@ function ProductDetailScreen({navigation, route, onAddToCart}) {
     setQuantity(currentQuantity => currentQuantity + 1);
   };
 
-  const handleAddToCart = () => {
-    onAddToCart(product, quantity);
-    Alert.alert('Added to Cart', `${quantity} x ${product.name} added to your cart.`);
+  const handleAddToCart = async () => {
+    try {
+      setAdding(true);
+      await onAddToCart(product, quantity);
+      Alert.alert('Added to Cart', `${quantity} x ${product.name} added to your cart.`);
+    } catch (error) {
+      Alert.alert('Add to Cart Failed', error.message || 'Unable to add item to cart.');
+    } finally {
+      setAdding(false);
+    }
   };
 
-  const handleBuyNow = () => {
-    onAddToCart(product, quantity);
-    Alert.alert(
-      'Ready to Checkout',
-      `${quantity} x ${product.name} has been added to your cart. Checkout can be connected next.`,
-    );
+  const handleBuyNow = async () => {
+    try {
+      setAdding(true);
+      await onAddToCart(product, quantity);
+      navigation.navigate('Cart');
+    } catch (error) {
+      Alert.alert('Buy Now Failed', error.message || 'Unable to continue to checkout.');
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
@@ -83,8 +95,9 @@ function ProductDetailScreen({navigation, route, onAddToCart}) {
             style={({pressed}) => [
               styles.primaryButton,
               pressed ? styles.buttonPressed : null,
-            ]}>
-            <Text style={styles.primaryButtonText}>Add to Cart</Text>
+            ]}
+            disabled={adding}>
+            <Text style={styles.primaryButtonText}>{adding ? 'Adding...' : 'Add to Cart'}</Text>
           </Pressable>
 
           <Pressable
@@ -92,7 +105,8 @@ function ProductDetailScreen({navigation, route, onAddToCart}) {
             style={({pressed}) => [
               styles.secondaryButton,
               pressed ? styles.buttonPressed : null,
-            ]}>
+            ]}
+            disabled={adding}>
             <Text style={styles.secondaryButtonText}>Buy Now</Text>
           </Pressable>
         </View>
