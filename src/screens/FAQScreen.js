@@ -53,26 +53,31 @@ const FAQScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Pressable onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>Back</Text>
-      </Pressable>
-      <Text style={styles.eyebrow}>PERFUME TREASURE</Text>
-      <Text style={styles.title}>Frequently Asked Questions</Text>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        nestedScrollEnabled
+        showsVerticalScrollIndicator={false}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Text style={styles.backText}>Back</Text>
+        </Pressable>
+        <Text style={styles.eyebrow}>PERFUME TREASURE</Text>
+        <Text style={styles.title}>Frequently Asked Questions</Text>
 
-      {faqs.map((item, index) => (
-        <View key={index} style={styles.itemWrap}>
-          <Pressable onPress={() => toggleFAQ(index)} style={styles.questionBox}>
-            <Text style={styles.question}>{item.question}</Text>
-            <Text style={styles.chevron}>{openIndex === index ? '-' : '+'}</Text>
-          </Pressable>
+        {faqs.map((item, index) => (
+          <View key={index} style={styles.itemWrap}>
+            <Pressable onPress={() => toggleFAQ(index)} style={styles.questionBox}>
+              <Text style={styles.question}>{item.question}</Text>
+              <Text style={styles.chevron}>{openIndex === index ? '-' : '+'}</Text>
+            </Pressable>
 
-          {openIndex === index && (
-            <Text style={styles.answer}>{item.answer}</Text>
-          )}
-        </View>
-      ))}
-    </ScrollView>
+            {openIndex === index && (
+              <Text style={styles.answer}>{item.answer}</Text>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -82,8 +87,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: palette.ivory,
+  },
+  scrollContent: {
     paddingHorizontal: 18,
     paddingTop: 46,
+    paddingBottom: 28,
   },
   backText: {
     color: palette.gold,
