@@ -13,8 +13,9 @@ import {
 import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function HomeScreen({navigation, route, cartCount, onLogout}) {
-  const userName = route.params?.name || 'Guest';
+function HomeScreen({navigation, route, cartCount, onLogout, currentUser}) {
+  const displayName = currentUser?.profile?.full_name || route.params?.name || 'Guest';
+  const displayEmail = currentUser?.email || route.params?.email || `${displayName}@perfume.com`;
   const [categoryCards, setCategoryCards] = useState([]);
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -124,9 +125,7 @@ function HomeScreen({navigation, route, cartCount, onLogout}) {
 
         <View style={styles.welcomeCard}>
           <Text style={styles.welcomeTitle}>Welcome back!</Text>
-          <Text style={styles.welcomeEmail}>
-            {route.params?.email || `${userName}@perfume.com`}
-          </Text>
+          <Text style={styles.welcomeEmail}>{displayEmail}</Text>
 
           <Pressable
             onPress={() => {

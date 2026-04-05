@@ -1,17 +1,43 @@
 import {Platform} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
 const API_BASE_URL = `http://${API_HOST}:5000/api`;
+const AUTH_TOKEN_KEY = 'perfume_treasure.auth_token';
 
-const MANUAL_DEV_JWT = '';
-let authToken = MANUAL_DEV_JWT;
+let authToken = '';
+
+export async function hydrateAuthToken() {
+  try {
+    const storedToken = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+    authToken = storedToken || '';
+    return authToken;
+  } catch (_error) {
+    authToken = '';
+    return '';
+  }
+}
+
+export function getAuthToken() {
+  return authToken;
+}
 
 export function setAuthToken(token) {
   authToken = token || '';
 }
 
-export function clearAuthToken() {
-  authToken = MANUAL_DEV_JWT;
+async function persistAuthToken(token) {
+  if (token) {
+    await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+    return;
+  }
+
+  await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+}
+
+export async function clearAuthToken() {
+  authToken = '';
+  await persistAuthToken('');
 }
 
 async function request(path, options = {}) {
@@ -124,6 +150,7 @@ export async function signupUser({fullName, email, password, phone = ''}) {
   const token = response.data?.token || '';
   if (token) {
     setAuthToken(token);
+    await persistAuthToken(token);
   }
 
   return response.data;
@@ -138,8 +165,14 @@ export async function loginUser({email, password}) {
   const token = response.data?.token || '';
   if (token) {
     setAuthToken(token);
+    await persistAuthToken(token);
   }
 
+  return response.data;
+}
+
+export async function fetchCurrentUser() {
+  const response = await request('/auth/me');
   return response.data;
 }
 

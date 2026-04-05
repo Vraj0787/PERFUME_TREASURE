@@ -111,8 +111,7 @@ Examples:
 - ~~cart screen to backend cart endpoints~~ **done**
 - ~~checkout screen to backend address and checkout endpoints~~ **done**
 - ~~order confirmation / order history to orders endpoints~~ **done**
-- optional switch from local demo auth to backend auth
-- replace manual dev JWT token with real login token flow
+- ~~optional switch from local demo auth to backend auth~~ **done**
 
 ## Local Backend Run Notes
 
@@ -129,17 +128,6 @@ Configured hosts:
 - iOS simulator uses `127.0.0.1:5000`
 - Android emulator uses `10.0.2.2:5000`
 
-## Manual JWT For Current Milestone
-
-Protected endpoints for cart, addresses, checkout, and orders currently use a manual dev token.
-
-1. Get a token from backend login:
-  - `POST /api/auth/login`
-2. Open `src/services/api.js`
-3. Set `MANUAL_DEV_JWT` to that token string.
-
-Until auth screens are wired to backend auth, cart/checkout/orders rely on this token.
-
 ## Recommended Next Work For Teammates
 
 - ~~Build `CartScreen`~~ **done**
@@ -149,9 +137,9 @@ Until auth screens are wired to backend auth, cart/checkout/orders rely on this 
 - ~~Connect place-order action to `/api/checkout`~~ **done**
 - ~~Build `OrderConfirmationScreen`~~ **done**
 - ~~Optionally connect login/signup to backend auth after cart and checkout are stable~~ **done**
-1. Connect login/signup to backend auth (`/api/auth/signup`, `/api/auth/login`).
-2. Replace manual `MANUAL_DEV_JWT` usage with runtime auth token state.
-3. Attach logout and token clear behavior.
+1. ~~Connect login/signup to backend auth (`/api/auth/signup`, `/api/auth/login`).~~ **done**
+2. ~~Replace manual `MANUAL_DEV_JWT` usage with runtime auth token state.~~ **done**
+3. ~~Attach logout and token clear behavior.~~ **done**
 4. Optionally connect forgot/reset password flow once backend supports reset APIs.
 
 ## Current Product Categories

@@ -18,7 +18,14 @@ import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
 import SignupScreen from './src/screens/SignupScreen';
-import {addCartItem, clearAuthToken, fetchCart} from './src/services/api';
+import {
+  addCartItem,
+  clearAuthToken,
+  fetchCurrentUser,
+  fetchCart,
+  getAuthToken,
+  hydrateAuthToken,
+} from './src/services/api';
 import {palette} from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -36,25 +43,10 @@ const navigationTheme = {
 };
 
 function App() {
-  const [registeredUser, setRegisteredUser] = useState(null);
+  const [isHydratingAuth, setIsHydratingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
-
-  const handleSignup = userData => {
-    setRegisteredUser(userData);
-  };
-
-  const handlePasswordReset = newPassword => {
-    setRegisteredUser(currentUser => {
-      if (!currentUser) {
-        return currentUser;
-      }
-
-      return {
-        ...currentUser,
-        password: newPassword,
-      };
-    });
-  };
 
   const updateCartCountFromSnapshot = cartSnapshot => {
     const itemTotal = (cartSnapshot?.items || []).reduce(
@@ -65,6 +57,11 @@ function App() {
   };
 
   const refreshCartCount = useCallback(async () => {
+    if (!getAuthToken()) {
+      setCartCount(0);
+      return {items: []};
+    }
+
     try {
       const cartSnapshot = await fetchCart();
       updateCartCountFromSnapshot(cartSnapshot);
@@ -76,29 +73,75 @@ function App() {
   }, []);
 
   useEffect(() => {
-    refreshCartCount();
-  }, [refreshCartCount]);
+    const bootstrapAuth = async () => {
+      await hydrateAuthToken();
+      const token = getAuthToken();
+      if (!token) {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setIsHydratingAuth(false);
+        return;
+      }
+
+      try {
+        const user = await fetchCurrentUser();
+        setCurrentUser(user || null);
+        setIsAuthenticated(true);
+      } catch (_error) {
+        await clearAuthToken();
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+      }
+
+      setIsHydratingAuth(false);
+    };
+
+    bootstrapAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isHydratingAuth && isAuthenticated) {
+      refreshCartCount();
+    }
+  }, [isAuthenticated, isHydratingAuth, refreshCartCount]);
 
   const handleAddToCart = async (product, quantity) => {
     await addCartItem(product.id, quantity);
     await refreshCartCount();
   };
 
-  const handleDemoLoginSuccess = async () => {
+  const handleLoginSuccess = async user => {
+    setCurrentUser(user || null);
+    setIsAuthenticated(true);
     await refreshCartCount();
   };
 
-  const handleLogout = () => {
-    clearAuthToken();
+  const handleSignupSuccess = async user => {
+    setCurrentUser(user || null);
+    setIsAuthenticated(true);
+    await refreshCartCount();
+  };
+
+  const handleLogout = async () => {
+    await clearAuthToken();
+    setCurrentUser(null);
+    setIsAuthenticated(false);
     setCartCount(0);
   };
+
+  const initialRouteName = isHydratingAuth
+    ? 'Login'
+    : isAuthenticated
+      ? 'Home'
+      : 'Login';
 
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor={palette.black} />
       <NavigationContainer theme={navigationTheme}>
         <Stack.Navigator
-          initialRouteName="Login"
+          key={initialRouteName}
+          initialRouteName={initialRouteName}
           screenOptions={{
             headerShown: false,
             contentStyle: {backgroundColor: palette.cream},
@@ -108,32 +151,26 @@ function App() {
             {props => (
               <LoginScreen
                 {...props}
-                registeredUser={registeredUser}
-                onDemoLoginSuccess={handleDemoLoginSuccess}
+                onLoginSuccess={handleLoginSuccess}
               />
             )}
           </Stack.Screen>
           <Stack.Screen name="Signup">
-            {props => <SignupScreen {...props} onSignup={handleSignup} />}
-          </Stack.Screen>
-          <Stack.Screen name="ForgotPassword">
             {props => (
-              <ForgotPasswordScreen {...props} registeredUser={registeredUser} />
-            )}
-          </Stack.Screen>
-          <Stack.Screen name="ResetPassword">
-            {props => (
-              <ResetPasswordScreen
+              <SignupScreen
                 {...props}
-                onResetPassword={handlePasswordReset}
+                onSignupSuccess={handleSignupSuccess}
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           <Stack.Screen name="Home">
             {props => (
               <HomeScreen
                 {...props}
                 cartCount={cartCount}
+                currentUser={currentUser}
                 onLogout={handleLogout}
               />
             )}
