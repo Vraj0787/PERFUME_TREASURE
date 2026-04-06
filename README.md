@@ -135,10 +135,10 @@ Use this to quickly verify the app after setup:
 	- iOS simulator: `127.0.0.1:5000`
 	- Android emulator: `10.0.2.2:5000`
 - Cart, addresses, checkout, and orders endpoints are JWT-protected.
-- Current milestone uses a manual token:
-	1. Call backend `POST /api/auth/login`
-	2. Copy token from response
-	3. Paste token into `MANUAL_DEV_JWT` in `src/services/api.js`
+- Auth tokens are stored by the app after a successful login and persisted in AsyncStorage.
+- On app launch, the auth state is hydrated from storage so returning users can stay signed in until they log out or the token becomes invalid.
+- Requests to protected endpoints automatically attach the persisted token as a Bearer `Authorization` header at runtime.
+- To test protected API flows, sign in through the app with a valid account instead of manually pasting a token into the codebase.
 
 ## Useful Commands
 
