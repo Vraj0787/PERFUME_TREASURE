@@ -1,9 +1,47 @@
-import React from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useCallback, useState} from 'react';
+import {ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 
+import {fetchCurrentUser, fetchOrders} from '../services/api';
 import {palette} from '../theme';
 
-function LoyaltyPointsScreen({navigation}) {
+function LoyaltyPointsScreen({navigation, currentUser}) {
+  const [pointsBalance, setPointsBalance] = useState(
+    Number(currentUser?.loyalty_points_balance || 0),
+  );
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [totalPointsEarned, setTotalPointsEarned] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadLoyaltyData = async () => {
+        try {
+          setLoading(true);
+          setErrorMessage('');
+
+          const [userData, orders] = await Promise.all([
+            fetchCurrentUser(),
+            fetchOrders(),
+          ]);
+
+          setPointsBalance(Number(userData?.loyalty_points_balance || 0));
+          setOrdersCount(orders.length);
+          setTotalPointsEarned(
+            orders.reduce((sum, order) => sum + Number(order.points_earned || 0), 0),
+          );
+        } catch (error) {
+          setErrorMessage(error.message || 'Unable to load loyalty details.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadLoyaltyData();
+    }, []),
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -19,7 +57,14 @@ function LoyaltyPointsScreen({navigation}) {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Current Balance</Text>
-          <Text style={styles.pointsValue}>320 Points</Text>
+          {loading ? (
+            <ActivityIndicator color={palette.gold} style={styles.loader} />
+          ) : (
+            <Text style={styles.pointsValue}>{pointsBalance} Points</Text>
+          )}
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+          <Text style={styles.cardNote}>Orders completed: {ordersCount}</Text>
+          <Text style={styles.cardNote}>Total points earned: {totalPointsEarned}</Text>
           <Text style={styles.cardNote}>
             Keep shopping to unlock exclusive samples, member pricing, and gift sets.
           </Text>
@@ -28,7 +73,7 @@ function LoyaltyPointsScreen({navigation}) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>How It Works</Text>
           <Text style={styles.listItem}>Earn 1 point for every $1 spent.</Text>
-          <Text style={styles.listItem}>Redeem points on future orders and seasonal rewards.</Text>
+          <Text style={styles.listItem}>Points are awarded when your order is placed.</Text>
           <Text style={styles.listItem}>Exclusive launches may include bonus point events.</Text>
         </View>
       </ScrollView>
@@ -91,10 +136,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 10,
   },
+  loader: {
+    marginBottom: 10,
+  },
   cardNote: {
     color: '#7b6b51',
     fontSize: 14,
     lineHeight: 21,
+  },
+  errorText: {
+    color: '#a13c2a',
+    fontSize: 13,
+    marginBottom: 8,
   },
   listItem: {
     color: '#7b6b51',

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {StatusBar} from 'react-native';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -11,11 +11,23 @@ import FavoritesScreen from './src/screens/Favoritesscreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
+import CartScreen from './src/screens/CartScreen';
+import CheckoutScreen from './src/screens/CheckoutScreen';
+import OrderConfirmationScreen from './src/screens/OrderConfirmationScreen';
+import OrderHistoryScreen from './src/screens/OrderHistoryScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
 import SignupScreen from './src/screens/SignupScreen';
+import {
+  addCartItem,
+  clearAuthToken,
+  fetchCurrentUser,
+  fetchCart,
+  getAuthToken,
+  hydrateAuthToken,
+} from './src/services/api';
 import {palette} from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -34,108 +46,203 @@ const navigationTheme = {
 };
 
 function App() {
-  const [registeredUser, setRegisteredUser] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [isHydratingAuth, setIsHydratingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
   const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     const loadFavorites = async () => {
       try {
-        const stored = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            // Migrate from old format (products) to new format (ids)
-            const ids = parsed.map(item => 
-              typeof item === 'object' && item.id ? item.id : item
-            ).filter(id => id != null);
-            setFavorites(ids);
-          }
+        const storedFavorites = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
+        if (!storedFavorites) {
+          return;
+        }
+
+        const parsedFavorites = JSON.parse(storedFavorites);
+        if (Array.isArray(parsedFavorites)) {
+          setFavorites(parsedFavorites);
         }
       } catch (_error) {
-        // Clear corrupted data
-        await AsyncStorage.removeItem(FAVORITES_STORAGE_KEY);
+        setFavorites([]);
       }
     };
+
     loadFavorites();
   }, []);
 
   useEffect(() => {
-    const saveFavorites = async () => {
-      try {
-        await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
-      } catch (_error) {}
-    };
-    saveFavorites();
+    AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites)).catch(() => {});
   }, [favorites]);
 
-  const handleToggleFavorite = product => {
-    if (!product || !product.id) return;
-    setFavorites(current => {
-      if (current.includes(product.id)) {
-        return current.filter(id => id !== product.id);
-      }
-      return [...current, product.id];
-    });
-  };
-
-  const isFavorited = productId => favorites.includes(productId);
-
-  const handleSignup = userData => {
-    setRegisteredUser(userData);
-  };
-
-  const handlePasswordReset = newPassword => {
-    setRegisteredUser(currentUser => {
-      if (!currentUser) return currentUser;
-      return {...currentUser, password: newPassword};
-    });
-  };
-
-  const handleAddToCart = (product, quantity) => {
-    setCartItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === product.id);
-      if (existingItem) {
-        return currentItems.map(item =>
-          item.id === product.id
-            ? {...item, quantity: item.quantity + quantity}
-            : item,
-        );
-      }
-      return [...currentItems, {...product, quantity}];
-    });
-  };
-
-  const cartCount = cartItems.reduce(
-    (totalQuantity, item) => totalQuantity + item.quantity,
-    0,
+  const isFavorited = useCallback(
+    productId => favorites.includes(productId),
+    [favorites],
   );
+
+  const handleToggleFavorite = useCallback(product => {
+    const productId = product?.id;
+    if (!productId) {
+      return;
+    }
+
+    setFavorites(previousFavorites => {
+      if (previousFavorites.includes(productId)) {
+        return previousFavorites.filter(id => id !== productId);
+      }
+
+      return [...previousFavorites, productId];
+    });
+  }, []);
+
+  const updateCartCountFromSnapshot = cartSnapshot => {
+    const itemTotal = (cartSnapshot?.items || []).reduce(
+      (totalQuantity, item) => totalQuantity + item.quantity,
+      0,
+    );
+    setCartCount(itemTotal);
+  };
+
+  const refreshCartCount = useCallback(async () => {
+    if (!getAuthToken()) {
+      setCartCount(0);
+      return {items: []};
+    }
+
+    try {
+      const cartSnapshot = await fetchCart();
+      updateCartCountFromSnapshot(cartSnapshot);
+      return cartSnapshot;
+    } catch (_error) {
+      setCartCount(0);
+      return {items: []};
+    }
+  }, []);
+
+  useEffect(() => {
+    const bootstrapAuth = async () => {
+      await hydrateAuthToken();
+      const token = getAuthToken();
+      if (!token) {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setIsHydratingAuth(false);
+        return;
+      }
+
+      try {
+        const user = await fetchCurrentUser();
+        setCurrentUser(user || null);
+        setIsAuthenticated(true);
+      } catch (_error) {
+        await clearAuthToken();
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+      }
+
+      setIsHydratingAuth(false);
+    };
+
+    bootstrapAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isHydratingAuth && isAuthenticated) {
+      refreshCartCount();
+    }
+  }, [isAuthenticated, isHydratingAuth, refreshCartCount]);
+
+  const handleAddToCart = async (product, quantity) => {
+    await addCartItem(product.id, quantity);
+    await refreshCartCount();
+  };
+
+  const handleLoginSuccess = async user => {
+    setCurrentUser(user || null);
+    setIsAuthenticated(true);
+    await refreshCartCount();
+  };
+
+  const handleSignupSuccess = async user => {
+    setCurrentUser(user || null);
+    setIsAuthenticated(true);
+    await refreshCartCount();
+  };
+
+  const handleLoyaltyEarned = pointsEarned => {
+    const pointsValue = Number(pointsEarned || 0);
+    if (!pointsValue) {
+      return;
+    }
+
+    setCurrentUser(user => {
+      if (!user) {
+        return user;
+      }
+
+      return {
+        ...user,
+        loyalty_points_balance: Number(user.loyalty_points_balance || 0) + pointsValue,
+      };
+    });
+  };
+
+  const handleLogout = async () => {
+    await clearAuthToken();
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setCartCount(0);
+  };
+
+  const initialRouteName = isHydratingAuth
+    ? 'Login'
+    : isAuthenticated
+      ? 'Home'
+      : 'Login';
 
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor={palette.black} />
       <NavigationContainer theme={navigationTheme}>
         <Stack.Navigator
-          initialRouteName="Login"
+          key={initialRouteName}
+          initialRouteName={initialRouteName}
           screenOptions={{
             headerShown: false,
             contentStyle: {backgroundColor: palette.cream},
             animation: 'slide_from_right',
           }}>
           <Stack.Screen name="Login">
-            {props => <LoginScreen {...props} registeredUser={registeredUser} />}
+            {props => (
+              <LoginScreen
+                {...props}
+                onLoginSuccess={handleLoginSuccess}
+              />
+            )}
           </Stack.Screen>
           <Stack.Screen name="Signup">
-            {props => <SignupScreen {...props} onSignup={handleSignup} />}
+            {props => (
+              <SignupScreen
+                {...props}
+                onSignupSuccess={handleSignupSuccess}
+              />
+            )}
           </Stack.Screen>
-          <Stack.Screen name="ForgotPassword">
-            {props => <ForgotPasswordScreen {...props} registeredUser={registeredUser} />}
-          </Stack.Screen>
-          <Stack.Screen name="ResetPassword">
-            {props => <ResetPasswordScreen {...props} onResetPassword={handlePasswordReset} />}
-          </Stack.Screen>
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
           <Stack.Screen name="Home">
-            {props => <HomeScreen {...props} cartCount={cartCount} favoritesCount={favorites.length} isFavorited={isFavorited} onToggleFavorite={handleToggleFavorite} />}
+            {props => (
+              <HomeScreen
+                {...props}
+                cartCount={cartCount}
+                currentUser={currentUser}
+                favoritesCount={favorites.length}
+                isFavorited={isFavorited}
+                onToggleFavorite={handleToggleFavorite}
+                onLogout={handleLogout}
+              />
+            )}
           </Stack.Screen>
           <Stack.Screen name="ProductList">
             {props => (
@@ -167,8 +274,29 @@ function App() {
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="Cart">
+            {props => (
+              <CartScreen
+                {...props}
+                onCartUpdated={updateCartCountFromSnapshot}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Checkout">
+            {props => (
+              <CheckoutScreen
+                {...props}
+                onCartUpdated={updateCartCountFromSnapshot}
+                onLoyaltyEarned={handleLoyaltyEarned}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
+          <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
           <Stack.Screen name="FAQ" component={FAQScreen} />
-          <Stack.Screen name="LoyaltyPoints" component={LoyaltyPointsScreen} />
+          <Stack.Screen name="LoyaltyPoints">
+            {props => <LoyaltyPointsScreen {...props} currentUser={currentUser} />}
+          </Stack.Screen>
           <Stack.Screen name="Review" component={ReviewScreen} />
         </Stack.Navigator>
       </NavigationContainer>

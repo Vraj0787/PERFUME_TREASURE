@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -11,15 +12,17 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {signupUser} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function SignupScreen({navigation, onSignup}) {
+function SignupScreen({navigation, onSignupSuccess}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (
       !name.trim() ||
       !email.trim() ||
@@ -35,18 +38,32 @@ function SignupScreen({navigation, onSignup}) {
       return;
     }
 
-    onSignup({
-      name: name.trim(),
-      email: email.trim(),
-      password,
-    });
+    try {
+      setLoading(true);
 
-    Alert.alert('Signup Successful', 'Your account has been created.', [
-      {
-        text: 'OK',
-        onPress: () => navigation.navigate('Login'),
-      },
-    ]);
+      const signupPayload = await signupUser({
+        fullName: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      onSignupSuccess?.(signupPayload?.user || null);
+
+      Alert.alert('Signup Successful', 'Your account has been created.', [
+        {
+          text: 'Continue',
+          onPress: () =>
+            navigation.replace('Home', {
+              name: signupPayload?.user?.profile?.full_name || name.trim(),
+              email: signupPayload?.user?.email || email.trim().toLowerCase(),
+            }),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert('Signup Failed', error.message || 'Unable to create your account.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -113,8 +130,17 @@ function SignupScreen({navigation, onSignup}) {
 
           <Pressable
             onPress={handleSignup}
-            style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
-            <Text style={styles.buttonText}>Create Account</Text>
+            style={({pressed}) => [
+              styles.button,
+              pressed && !loading ? styles.buttonPressed : null,
+              loading ? styles.buttonDisabled : null,
+            ]}
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color={palette.white} />
+            ) : (
+              <Text style={styles.buttonText}>Create Account</Text>
+            )}
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('Login')}>
@@ -212,6 +238,9 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.92,
+  },
+  buttonDisabled: {
+    opacity: 0.75,
   },
   buttonText: {
     color: palette.white,

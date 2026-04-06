@@ -1,6 +1,6 @@
 # Perfume Treasure
 
-React Native mobile app for the `Perfume Treasure` login, signup, and home flow.
+React Native mobile app for the `Perfume Treasure` auth demo, product browsing, cart, checkout, and order history flow.
 
 ## What Is Included
 
@@ -8,6 +8,10 @@ React Native mobile app for the `Perfume Treasure` login, signup, and home flow.
 - Signup screen
 - Forgot password demo flow
 - Home screen
+- Cart screen
+- Checkout screen
+- Order confirmation screen
+- Order history screen
 - React Navigation screen flow
 - Black, gold, and ivory perfume-themed UI
 
@@ -118,8 +122,23 @@ Use this to quickly verify the app after setup:
 5. Confirm successful signup.
 6. Return to Login and sign in with the same credentials.
 7. Confirm the app opens the Home screen.
-8. Tap `Log Out` and confirm it returns to Login.
-9. Tap `Forgot Password?` and test the demo reset flow.
+8. Browse products and add at least one item to cart.
+9. Open Cart and continue to Checkout.
+10. Add/select address and place order.
+11. Confirm Order Confirmation and Order History screens load.
+12. Tap `Log Out` and confirm it returns to Login.
+13. Tap `Forgot Password?` and test the demo reset flow.
+
+## Backend Connection Notes
+
+- Frontend API host mapping is in `src/services/api.js`:
+	- iOS simulator: `127.0.0.1:5000`
+	- Android emulator: `10.0.2.2:5000`
+- Cart, addresses, checkout, and orders endpoints are JWT-protected.
+- Auth tokens are stored by the app after a successful login and persisted in AsyncStorage.
+- On app launch, the auth state is hydrated from storage so returning users can stay signed in until they log out or the token becomes invalid.
+- Requests to protected endpoints automatically attach the persisted token as a Bearer `Authorization` header at runtime.
+- To test protected API flows, sign in through the app with a valid account instead of manually pasting a token into the codebase.
 
 ## Useful Commands
 

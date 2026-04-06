@@ -18,6 +18,10 @@ This handoff covers the parts already completed for:
 - `src/screens/HomeScreen.js`
 - `src/screens/ProductListScreen.js`
 - `src/screens/ProductDetailScreen.js`
+- `src/screens/CartScreen.js`
+- `src/screens/CheckoutScreen.js`
+- `src/screens/OrderConfirmationScreen.js`
+- `src/screens/OrderHistoryScreen.js`
 
 ## Frontend API Layer
 
@@ -29,6 +33,8 @@ This file is currently responsible for:
 - loading featured products from the backend
 - loading products by category
 - applying backend search and sorting
+- attaching JWT token to protected API calls
+- cart, address, checkout, and orders API calls
 
 ## Backend Location
 
@@ -95,13 +101,17 @@ Examples:
 - search uses backend data
 - sort uses backend data
 - product detail screen receives backend product data
+- cart screen uses backend cart endpoints
+- checkout screen uses backend address and checkout endpoints
+- order history screen uses backend orders endpoint
+- order confirmation screen is driven by checkout API response
 
 ## What Still Needs Integration
 
-- cart screen to backend cart endpoints
-- checkout screen to backend address and checkout endpoints
-- order confirmation / order history to orders endpoints
-- optional switch from local demo auth to backend auth
+- ~~cart screen to backend cart endpoints~~ **done**
+- ~~checkout screen to backend address and checkout endpoints~~ **done**
+- ~~order confirmation / order history to orders endpoints~~ **done**
+- ~~optional switch from local demo auth to backend auth~~ **done**
 
 ## Local Backend Run Notes
 
@@ -115,18 +125,22 @@ Current local API base behavior in:
 
 Configured hosts:
 
-- iOS simulator uses `127.0.0.1:5001`
-- Android emulator uses `10.0.2.2:5001`
+- iOS simulator uses `127.0.0.1:5000`
+- Android emulator uses `10.0.2.2:5000`
 
 ## Recommended Next Work For Teammates
 
-1. Build `CartScreen`
-2. Connect cart actions to `/api/cart`
-3. Build `CheckoutScreen`
-4. Connect address form to `/api/addresses`
-5. Connect place-order action to `/api/checkout`
-6. Build `OrderConfirmationScreen`
-7. Optionally connect login/signup to backend auth after cart and checkout are stable
+- ~~Build `CartScreen`~~ **done**
+- ~~Connect cart actions to `/api/cart`~~ **done**
+- ~~Build `CheckoutScreen`~~ **done**
+- ~~Connect address form to `/api/addresses`~~ **done**
+- ~~Connect place-order action to `/api/checkout`~~ **done**
+- ~~Build `OrderConfirmationScreen`~~ **done**
+- ~~Optionally connect login/signup to backend auth after cart and checkout are stable~~ **done**
+1. ~~Connect login/signup to backend auth (`/api/auth/signup`, `/api/auth/login`).~~ **done**
+2. ~~Replace manual `MANUAL_DEV_JWT` usage with runtime auth token state.~~ **done**
+3. ~~Attach logout and token clear behavior.~~ **done**
+4. Optionally connect forgot/reset password flow once backend supports reset APIs.
 
 ## Current Product Categories
 
