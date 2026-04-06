@@ -11,9 +11,10 @@ import {
 
 import {palette} from '../theme';
 
-function ProductDetailScreen({navigation, route, onAddToCart}) {
+function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onToggleFavorite}) {
   const product = route.params?.product;
   const [quantity, setQuantity] = useState(1);
+  const favorited = product ? isFavorited(product.id) : false;
 
   if (!product) {
     return (
@@ -51,9 +52,19 @@ function ProductDetailScreen({navigation, route, onAddToCart}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => navigation.goBack()}>
+              <Text style={styles.backText}>Back</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => onToggleFavorite(product)}
+              style={[styles.heartButton, favorited ? styles.heartButtonActive : null]}
+              hitSlop={8}>
+              <Text style={styles.heartIcon}>
+                {favorited ? '❤️' : '🤍'}
+              </Text>
+            </Pressable>
+          </View>
           <Text style={styles.brandText}>PERFUME TREASURE</Text>
         </View>
 
@@ -125,6 +136,29 @@ const styles = StyleSheet.create({
     paddingTop: 46,
     paddingHorizontal: 18,
     paddingBottom: 18,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  heartButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: palette.white,
+    borderWidth: 1,
+    borderColor: palette.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heartButtonActive: {
+    backgroundColor: '#fff0f0',
+    borderColor: '#f8cece',
+  },
+  heartIcon: {
+    fontSize: 22,
   },
   backText: {
     color: palette.goldSoft,

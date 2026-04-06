@@ -1,7 +1,7 @@
 import {Platform} from 'react-native';
 
 const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
-const API_BASE_URL = `http://${API_HOST}:5001/api`;
+const API_BASE_URL = `http://${API_HOST}:5000/api`;
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {

@@ -1,11 +1,13 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StatusBar} from 'react-native';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeScreen from './src/screens/HomeScreen';
 import FAQScreen from './src/screens/FAQScreen';
+import FavoritesScreen from './src/screens/Favoritesscreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
@@ -17,6 +19,7 @@ import SignupScreen from './src/screens/SignupScreen';
 import {palette} from './src/theme';
 
 const Stack = createNativeStackNavigator();
+const FAVORITES_STORAGE_KEY = 'perfume_treasure_favorites';
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -33,6 +36,50 @@ const navigationTheme = {
 function App() {
   const [registeredUser, setRegisteredUser] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            // Migrate from old format (products) to new format (ids)
+            const ids = parsed.map(item => 
+              typeof item === 'object' && item.id ? item.id : item
+            ).filter(id => id != null);
+            setFavorites(ids);
+          }
+        }
+      } catch (_error) {
+        // Clear corrupted data
+        await AsyncStorage.removeItem(FAVORITES_STORAGE_KEY);
+      }
+    };
+    loadFavorites();
+  }, []);
+
+  useEffect(() => {
+    const saveFavorites = async () => {
+      try {
+        await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+      } catch (_error) {}
+    };
+    saveFavorites();
+  }, [favorites]);
+
+  const handleToggleFavorite = product => {
+    if (!product || !product.id) return;
+    setFavorites(current => {
+      if (current.includes(product.id)) {
+        return current.filter(id => id !== product.id);
+      }
+      return [...current, product.id];
+    });
+  };
+
+  const isFavorited = productId => favorites.includes(productId);
 
   const handleSignup = userData => {
     setRegisteredUser(userData);
@@ -40,21 +87,14 @@ function App() {
 
   const handlePasswordReset = newPassword => {
     setRegisteredUser(currentUser => {
-      if (!currentUser) {
-        return currentUser;
-      }
-
-      return {
-        ...currentUser,
-        password: newPassword,
-      };
+      if (!currentUser) return currentUser;
+      return {...currentUser, password: newPassword};
     });
   };
 
   const handleAddToCart = (product, quantity) => {
     setCartItems(currentItems => {
       const existingItem = currentItems.find(item => item.id === product.id);
-
       if (existingItem) {
         return currentItems.map(item =>
           item.id === product.id
@@ -62,7 +102,6 @@ function App() {
             : item,
         );
       }
-
       return [...currentItems, {...product, quantity}];
     });
   };
@@ -84,37 +123,47 @@ function App() {
             animation: 'slide_from_right',
           }}>
           <Stack.Screen name="Login">
-            {props => (
-              <LoginScreen {...props} registeredUser={registeredUser} />
-            )}
+            {props => <LoginScreen {...props} registeredUser={registeredUser} />}
           </Stack.Screen>
           <Stack.Screen name="Signup">
             {props => <SignupScreen {...props} onSignup={handleSignup} />}
           </Stack.Screen>
           <Stack.Screen name="ForgotPassword">
-            {props => (
-              <ForgotPasswordScreen {...props} registeredUser={registeredUser} />
-            )}
+            {props => <ForgotPasswordScreen {...props} registeredUser={registeredUser} />}
           </Stack.Screen>
           <Stack.Screen name="ResetPassword">
-            {props => (
-              <ResetPasswordScreen
-                {...props}
-                onResetPassword={handlePasswordReset}
-              />
-            )}
+            {props => <ResetPasswordScreen {...props} onResetPassword={handlePasswordReset} />}
           </Stack.Screen>
           <Stack.Screen name="Home">
-            {props => <HomeScreen {...props} cartCount={cartCount} />}
+            {props => <HomeScreen {...props} cartCount={cartCount} favoritesCount={favorites.length} isFavorited={isFavorited} onToggleFavorite={handleToggleFavorite} />}
           </Stack.Screen>
           <Stack.Screen name="ProductList">
-            {props => <ProductListScreen {...props} cartCount={cartCount} />}
+            {props => (
+              <ProductListScreen
+                {...props}
+                cartCount={cartCount}
+                isFavorited={isFavorited}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            )}
           </Stack.Screen>
           <Stack.Screen name="ProductDetail">
             {props => (
               <ProductDetailScreen
                 {...props}
                 onAddToCart={handleAddToCart}
+                isFavorited={isFavorited}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Favorites">
+            {props => (
+              <FavoritesScreen
+                {...props}
+                favoritesIds={favorites}
+                onAddToCart={handleAddToCart}
+                onToggleFavorite={handleToggleFavorite}
               />
             )}
           </Stack.Screen>

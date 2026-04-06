@@ -13,7 +13,7 @@ import {
 import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function HomeScreen({navigation, route, cartCount}) {
+function HomeScreen({navigation, route, cartCount, favoritesCount, isFavorited, onToggleFavorite}) {
   const userName = route.params?.name || 'Guest';
   const [categoryCards, setCategoryCards] = useState([]);
   const [featuredProduct, setFeaturedProduct] = useState(null);
@@ -158,26 +158,36 @@ function HomeScreen({navigation, route, cartCount}) {
             <ActivityIndicator color={palette.gold} />
           </View>
         ) : featuredProduct ? (
-          <Pressable
-            onPress={() =>
-              navigation.navigate('ProductDetail', {
-                product: featuredProduct,
-              })
-            }
-            style={({pressed}) => [
-              styles.featureCard,
-              pressed ? styles.featureCardPressed : null,
-            ]}>
-            <Image source={{uri: featuredProduct.image}} style={styles.featureImage} />
-            <View style={styles.featureCopy}>
-              <Text style={styles.featureTitle}>{featuredProduct.name}</Text>
-              <Text style={styles.featureMeta}>{featuredProduct.category}</Text>
-              <Text numberOfLines={2} style={styles.featureDescription}>
-                {featuredProduct.description}
+          <View style={styles.featureCard}>
+            <Pressable
+              onPress={() =>
+                navigation.navigate('ProductDetail', {
+                  product: featuredProduct,
+                })
+              }
+              style={({pressed}) => [
+                styles.featureCardPressable,
+                pressed ? styles.featureCardPressed : null,
+              ]}>
+              <Image source={{uri: featuredProduct.image}} style={styles.featureImage} />
+              <View style={styles.featureCopy}>
+                <Text style={styles.featureTitle}>{featuredProduct.name}</Text>
+                <Text style={styles.featureMeta}>{featuredProduct.category}</Text>
+                <Text numberOfLines={2} style={styles.featureDescription}>
+                  {featuredProduct.description}
+                </Text>
+                <Text style={styles.featurePrice}>${featuredProduct.price.toFixed(2)}</Text>
+              </View>
+            </Pressable>
+            <Pressable
+              onPress={() => onToggleFavorite(featuredProduct)}
+              style={styles.featureHeartButton}
+              hitSlop={8}>
+              <Text style={styles.featureHeartIcon}>
+                {isFavorited(featuredProduct.id) ? '❤️' : '🤍'}
               </Text>
-              <Text style={styles.featurePrice}>${featuredProduct.price.toFixed(2)}</Text>
-            </View>
-          </Pressable>
+            </Pressable>
+          </View>
         ) : (
           <View style={styles.loadingWrap}>
             <Text style={styles.emptyText}>Featured fragrances will appear here.</Text>
@@ -207,6 +217,16 @@ function HomeScreen({navigation, route, cartCount}) {
         onRequestClose={() => setMenuVisible(false)}>
         <Pressable style={styles.menuOverlay} onPress={() => setMenuVisible(false)}>
           <View style={styles.menuSheet}>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Favorites');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>
+                My Favorites{favoritesCount > 0 ? ` (${favoritesCount})` : ''}
+              </Text>
+            </Pressable>
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
@@ -434,7 +454,6 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     borderRadius: 16,
     padding: 14,
-    flexDirection: 'row',
     borderWidth: 1,
     borderColor: '#ede3ca',
     shadowColor: '#000000',
@@ -442,6 +461,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 14,
     elevation: 3,
+  },
+  featureCardPressable: {
+    flexDirection: 'row',
+  },
+  featureHeartButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureHeartIcon: {
+    fontSize: 16,
   },
   featureImage: {
     width: 72,
