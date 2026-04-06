@@ -121,7 +121,15 @@ function CartScreen({navigation, onCartUpdated}) {
           <View style={styles.stateWrap}>
             <Text style={styles.stateTitle}>Unable to load cart</Text>
             <Text style={styles.stateText}>{errorMessage}</Text>
-            <Text style={styles.hintText}>Add your JWT token in src/services/api.js (MANUAL_DEV_JWT).</Text>
+            <Text style={styles.hintText}>Your session may have expired. Please log in again.</Text>
+            <Pressable
+              onPress={() => navigation.replace('Login')}
+              style={({pressed}) => [
+                styles.errorActionButton,
+                pressed ? styles.buttonPressed : null,
+              ]}>
+              <Text style={styles.errorActionText}>Go to Login</Text>
+            </Pressable>
           </View>
         ) : cart.items.length === 0 ? (
           <View style={styles.stateWrap}>
@@ -249,6 +257,20 @@ const styles = StyleSheet.create({
     color: '#7f6f51',
     textAlign: 'center',
     fontSize: 12,
+  },
+  errorActionButton: {
+    marginTop: 14,
+    height: 44,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.gold,
+  },
+  errorActionText: {
+    color: palette.white,
+    fontSize: 14,
+    fontWeight: '700',
   },
   contentWrap: {
     paddingHorizontal: 16,
