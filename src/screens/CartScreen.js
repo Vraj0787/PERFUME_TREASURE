@@ -121,7 +121,7 @@ function CartScreen({navigation, onCartUpdated}) {
           <View style={styles.stateWrap}>
             <Text style={styles.stateTitle}>Unable to load cart</Text>
             <Text style={styles.stateText}>{errorMessage}</Text>
-            <Text style={styles.hintText}>Add your JWT token in src/services/api.js (MANUAL_DEV_JWT).</Text>
+            <Text style={styles.hintText}>Please sign in again and try reloading your cart.</Text>
           </View>
         ) : cart.items.length === 0 ? (
           <View style={styles.stateWrap}>
