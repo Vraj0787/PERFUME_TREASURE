@@ -135,10 +135,9 @@ Use this to quickly verify the app after setup:
 	- iOS simulator: `127.0.0.1:5000`
 	- Android emulator: `10.0.2.2:5000`
 - Cart, addresses, checkout, and orders endpoints are JWT-protected.
-- Current milestone uses a manual token:
-	1. Call backend `POST /api/auth/login`
-	2. Copy token from response
-	3. Paste token into `MANUAL_DEV_JWT` in `src/services/api.js`
+- The app now handles JWTs through the runtime login/signup flow.
+- After a successful login or signup, the auth token is stored automatically in AsyncStorage under `perfume_treasure.auth_token`.
+- No manual token copy/paste or `MANUAL_DEV_JWT` setup is required.
 
 ## Useful Commands
 
