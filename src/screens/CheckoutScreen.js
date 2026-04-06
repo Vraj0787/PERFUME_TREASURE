@@ -29,7 +29,7 @@ const initialForm = {
   phone: '',
 };
 
-function CheckoutScreen({navigation, onCartUpdated}) {
+function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [form, setForm] = useState(initialForm);
@@ -100,6 +100,7 @@ function CheckoutScreen({navigation, onCartUpdated}) {
       setPlacingOrder(true);
       const order = await createCheckout({addressId: selectedAddressId});
       onCartUpdated?.({items: []});
+      onLoyaltyEarned?.(order?.points_earned || 0);
       navigation.replace('OrderConfirmation', {order});
     } catch (error) {
       Alert.alert('Checkout Failed', error.message || 'Unable to place order.');

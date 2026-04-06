@@ -126,6 +126,9 @@ function HomeScreen({navigation, route, cartCount, onLogout, currentUser}) {
         <View style={styles.welcomeCard}>
           <Text style={styles.welcomeTitle}>Welcome back!</Text>
           <Text style={styles.welcomeEmail}>{displayEmail}</Text>
+                <Text style={styles.welcomePoints}>
+                  Loyalty Points: {Number(currentUser?.loyalty_points_balance || 0)}
+                </Text>
 
           <Pressable
             onPress={() => {
@@ -378,6 +381,11 @@ const styles = StyleSheet.create({
     color: '#8b7d63',
     fontSize: 14,
     marginBottom: 14,
+  },
+  welcomePoints: {
+    color: '#7b6b51',
+    fontSize: 14,
+    marginBottom: 12,
   },
   button: {
     height: 52,

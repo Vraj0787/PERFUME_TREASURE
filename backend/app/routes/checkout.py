@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
+import math
 
 from ..extensions import db
 from ..models.address import Address
@@ -47,10 +48,14 @@ def create_checkout():
         shipping_amount=totals["shipping_amount"],
         tax_amount=totals["tax_amount"],
         total_amount=totals["total_amount"],
+        points_earned=math.floor(float(totals["total_amount"])),
+        points_redeemed=0,
         payment_method=payment_method,
     )
     db.session.add(order)
     db.session.flush()
+
+    user.loyalty_points_balance += order.points_earned
 
     for cart_item in cart_items:
         order_item = OrderItem(

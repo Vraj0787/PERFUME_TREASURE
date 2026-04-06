@@ -122,6 +122,24 @@ function App() {
     await refreshCartCount();
   };
 
+  const handleLoyaltyEarned = pointsEarned => {
+    const pointsValue = Number(pointsEarned || 0);
+    if (!pointsValue) {
+      return;
+    }
+
+    setCurrentUser(user => {
+      if (!user) {
+        return user;
+      }
+
+      return {
+        ...user,
+        loyalty_points_balance: Number(user.loyalty_points_balance || 0) + pointsValue,
+      };
+    });
+  };
+
   const handleLogout = async () => {
     await clearAuthToken();
     setCurrentUser(null);
@@ -199,13 +217,16 @@ function App() {
               <CheckoutScreen
                 {...props}
                 onCartUpdated={updateCartCountFromSnapshot}
+                onLoyaltyEarned={handleLoyaltyEarned}
               />
             )}
           </Stack.Screen>
           <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
           <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
           <Stack.Screen name="FAQ" component={FAQScreen} />
-          <Stack.Screen name="LoyaltyPoints" component={LoyaltyPointsScreen} />
+          <Stack.Screen name="LoyaltyPoints">
+            {props => <LoyaltyPointsScreen {...props} currentUser={currentUser} />}
+          </Stack.Screen>
           <Stack.Screen name="Review" component={ReviewScreen} />
         </Stack.Navigator>
       </NavigationContainer>

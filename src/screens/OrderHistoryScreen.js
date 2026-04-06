@@ -73,6 +73,7 @@ function OrderHistoryScreen({navigation}) {
                 <Text style={styles.orderMeta}>Placed: {new Date(order.created_at).toLocaleString()}</Text>
                 <Text style={styles.orderMeta}>Status: {order.status}</Text>
                 <Text style={styles.orderMeta}>Payment: {order.payment_status}</Text>
+                <Text style={styles.orderMeta}>Points Earned: {Number(order.points_earned || 0)}</Text>
                 <Text style={styles.orderTotal}>Total: ${Number(order.total_amount || 0).toFixed(2)}</Text>
               </View>
             ))}

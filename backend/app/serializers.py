@@ -24,6 +24,7 @@ def serialize_user(user):
         "id": user.id,
         "email": user.email,
         "is_active": user.is_active,
+        "loyalty_points_balance": user.loyalty_points_balance,
         "profile": serialize_profile(user.profile) if user.profile else None,
     }
 
@@ -96,6 +97,8 @@ def serialize_order(order):
         "shipping_amount": float(order.shipping_amount),
         "tax_amount": float(order.tax_amount),
         "total_amount": float(order.total_amount),
+        "points_earned": order.points_earned,
+        "points_redeemed": order.points_redeemed,
         "payment_method": order.payment_method,
         "transaction_reference": order.transaction_reference,
         "created_at": order.created_at.isoformat(),

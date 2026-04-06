@@ -16,6 +16,7 @@ function OrderConfirmationScreen({navigation, route}) {
           <Text style={styles.summaryLine}>Order ID: #{order?.id || '-'}</Text>
           <Text style={styles.summaryLine}>Status: {order?.status || '-'}</Text>
           <Text style={styles.summaryLine}>Payment: {order?.payment_status || '-'}</Text>
+          <Text style={styles.summaryLine}>Points Earned: {Number(order?.points_earned || 0)}</Text>
           <Text style={styles.summaryTotal}>Total: ${Number(order?.total_amount || 0).toFixed(2)}</Text>
         </View>
 
