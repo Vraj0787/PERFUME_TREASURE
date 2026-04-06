@@ -3,9 +3,11 @@ import {StatusBar} from 'react-native';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeScreen from './src/screens/HomeScreen';
 import FAQScreen from './src/screens/FAQScreen';
+import FavoritesScreen from './src/screens/Favoritesscreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
@@ -29,6 +31,7 @@ import {
 import {palette} from './src/theme';
 
 const Stack = createNativeStackNavigator();
+const FAVORITES_STORAGE_KEY = 'perfume_treasure_favorites';
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -47,6 +50,51 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const storedFavorites = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
+        if (!storedFavorites) {
+          return;
+        }
+
+        const parsedFavorites = JSON.parse(storedFavorites);
+        if (Array.isArray(parsedFavorites)) {
+          setFavorites(parsedFavorites);
+        }
+      } catch (_error) {
+        setFavorites([]);
+      }
+    };
+
+    loadFavorites();
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites)).catch(() => {});
+  }, [favorites]);
+
+  const isFavorited = useCallback(
+    productId => favorites.includes(productId),
+    [favorites],
+  );
+
+  const handleToggleFavorite = useCallback(product => {
+    const productId = product?.id;
+    if (!productId) {
+      return;
+    }
+
+    setFavorites(previousFavorites => {
+      if (previousFavorites.includes(productId)) {
+        return previousFavorites.filter(id => id !== productId);
+      }
+
+      return [...previousFavorites, productId];
+    });
+  }, []);
 
   const updateCartCountFromSnapshot = cartSnapshot => {
     const itemTotal = (cartSnapshot?.items || []).reduce(
@@ -189,18 +237,40 @@ function App() {
                 {...props}
                 cartCount={cartCount}
                 currentUser={currentUser}
+                favoritesCount={favorites.length}
+                isFavorited={isFavorited}
+                onToggleFavorite={handleToggleFavorite}
                 onLogout={handleLogout}
               />
             )}
           </Stack.Screen>
           <Stack.Screen name="ProductList">
-            {props => <ProductListScreen {...props} cartCount={cartCount} />}
+            {props => (
+              <ProductListScreen
+                {...props}
+                cartCount={cartCount}
+                isFavorited={isFavorited}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            )}
           </Stack.Screen>
           <Stack.Screen name="ProductDetail">
             {props => (
               <ProductDetailScreen
                 {...props}
                 onAddToCart={handleAddToCart}
+                isFavorited={isFavorited}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Favorites">
+            {props => (
+              <FavoritesScreen
+                {...props}
+                favoritesIds={favorites}
+                onAddToCart={handleAddToCart}
+                onToggleFavorite={handleToggleFavorite}
               />
             )}
           </Stack.Screen>
