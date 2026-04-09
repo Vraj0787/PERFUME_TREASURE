@@ -11,7 +11,14 @@ import {
 
 import {palette} from '../theme';
 
-function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onToggleFavorite}) {
+function ProductDetailScreen({
+  navigation,
+  route,
+  cartCount,
+  onAddToCart,
+  isFavorited,
+  onToggleFavorite,
+}) {
   const product = route.params?.product;
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -68,14 +75,24 @@ function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onTog
             <Pressable onPress={() => navigation.goBack()}>
               <Text style={styles.backText}>Back</Text>
             </Pressable>
-            <Pressable
-              onPress={() => onToggleFavorite?.(product)}
-              style={[styles.heartButton, favorited ? styles.heartButtonActive : null]}
-              hitSlop={8}>
-              <Text style={styles.heartIcon}>
-                {favorited ? '❤️' : '🤍'}
-              </Text>
-            </Pressable>
+            <View style={styles.headerActions}>
+              <Pressable
+                onPress={() => navigation.navigate('Cart')}
+                style={({pressed}) => [
+                  styles.cartPill,
+                  pressed ? styles.cartPillPressed : null,
+                ]}>
+                <Text style={styles.cartText}>Cart {cartCount}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => onToggleFavorite?.(product)}
+                style={[styles.heartButton, favorited ? styles.heartButtonActive : null]}
+                hitSlop={8}>
+                <Text style={styles.heartIcon}>
+                  {favorited ? '❤️' : '🤍'}
+                </Text>
+              </Pressable>
+            </View>
           </View>
           <Text style={styles.brandText}>PERFUME TREASURE</Text>
         </View>
@@ -157,6 +174,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  cartPill: {
+    borderWidth: 1,
+    borderColor: '#7c6330',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: '#2a1a16',
+  },
+  cartPillPressed: {
+    opacity: 0.92,
+  },
+  cartText: {
+    color: '#f0dfb1',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   heartButton: {
     width: 42,
     height: 42,
@@ -178,7 +216,6 @@ const styles = StyleSheet.create({
     color: palette.goldSoft,
     fontSize: 14,
     fontWeight: '700',
-    marginBottom: 12,
   },
   brandText: {
     color: palette.goldSoft,

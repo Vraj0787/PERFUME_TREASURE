@@ -19,7 +19,7 @@ const sortOptions = [
   {label: 'Name A-Z', value: 'name_asc'},
 ];
 
-function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
+function ProductListScreen({navigation, route, cartCount, isFavorited, onToggleFavorite}) {
   const selectedCategory = route.params?.category || 'Shop All';
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('price_asc');
@@ -73,9 +73,19 @@ function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <View style={styles.headerTopRow}>
+            <Pressable onPress={() => navigation.goBack()}>
+              <Text style={styles.backText}>Back</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('Cart')}
+              style={({pressed}) => [
+                styles.cartPill,
+                pressed ? styles.cartPillPressed : null,
+              ]}>
+              <Text style={styles.cartPillText}>Cart {cartCount}</Text>
+            </Pressable>
+          </View>
           <Text style={styles.headerBrand}>PERFUME TREASURE</Text>
           <Text style={styles.headerTitle}>Browse Collection</Text>
           <View style={styles.categoryBadge}>
@@ -191,11 +201,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingBottom: 24,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
   backText: {
     color: palette.goldSoft,
     fontSize: 14,
     fontWeight: '700',
-    marginBottom: 14,
+  },
+  cartPill: {
+    borderWidth: 1,
+    borderColor: '#7c6330',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: '#2a1a16',
+  },
+  cartPillPressed: {
+    opacity: 0.92,
+  },
+  cartPillText: {
+    color: '#f0dfb1',
+    fontSize: 12,
+    fontWeight: '700',
   },
   headerBrand: {
     color: palette.goldSoft,

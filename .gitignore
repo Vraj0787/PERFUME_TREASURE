@@ -81,8 +81,6 @@ rnhelp.err
 # Python bytecode/cache
 **/__pycache__/
 *.py[cod]
-android/gradle.properties
-android/gradle.properties
 backend/.env
-.gitignore
-backend/.env
+/PERFUME_TREASURE/
+*.zip

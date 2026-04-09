@@ -11,12 +11,16 @@ from flask import (
     session,
     url_for,
 )
+from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 
 from ..extensions import db
+from ..models.address import Address
 from ..models.category import Category
+from ..models.order import Order
 from ..models.product import Product
 from ..models.product_image import ProductImage
+from ..models.user import User
 from ..utils.admin import admin_required
 
 admin_bp = Blueprint("admin", __name__)
@@ -101,6 +105,8 @@ def dashboard():
         "categories_count": Category.query.count(),
         "featured_count": Product.query.filter_by(is_featured=True).count(),
         "low_stock_count": Product.query.filter(Product.stock_quantity <= 5).count(),
+        "customers_count": User.query.count(),
+        "orders_count": Order.query.count(),
     }
     return render_template(
         "admin/dashboard.html",
@@ -111,6 +117,102 @@ def dashboard():
         category_filter=category_filter,
         status_filter=status_filter,
         media_prefix="",
+    )
+
+
+@admin_bp.get("/customers")
+@admin_required
+def customers():
+    search = (request.args.get("search") or "").strip()
+    customers_query = User.query.options(
+        joinedload(User.profile),
+        joinedload(User.addresses),
+        joinedload(User.orders),
+    )
+
+    if search:
+        search_like = f"%{search}%"
+        customers_query = customers_query.outerjoin(User.profile).filter(
+            (User.email.ilike(search_like)) | (Address.full_name.ilike(search_like))
+        )
+
+    customer_items = customers_query.order_by(User.created_at.desc()).all()
+    return render_template(
+        "admin/customers.html",
+        title="Customers",
+        customers=customer_items,
+        search=search,
+    )
+
+
+@admin_bp.get("/customers/<customer_id>")
+@admin_required
+def customer_detail(customer_id):
+    customer = (
+        User.query.options(
+            joinedload(User.profile),
+            joinedload(User.addresses),
+            joinedload(User.orders).joinedload(Order.items),
+        )
+        .filter_by(id=customer_id)
+        .first_or_404()
+    )
+    return render_template(
+        "admin/customer_detail.html",
+        title="Customer Detail",
+        customer=customer,
+    )
+
+
+@admin_bp.get("/orders")
+@admin_required
+def orders():
+    status_filter = (request.args.get("status") or "").strip()
+    search = (request.args.get("search") or "").strip()
+
+    orders_query = Order.query.options(
+        joinedload(Order.user).joinedload(User.profile),
+        joinedload(Order.address),
+        joinedload(Order.items),
+    )
+
+    if status_filter:
+        orders_query = orders_query.filter(Order.status == status_filter)
+
+    if search:
+        search_like = f"%{search}%"
+        orders_query = orders_query.join(Order.user).outerjoin(User.profile).filter(
+            (Order.id.ilike(search_like))
+            | (User.email.ilike(search_like))
+            | (Address.full_name.ilike(search_like))
+        )
+
+    order_items = orders_query.order_by(Order.created_at.desc()).all()
+    return render_template(
+        "admin/orders.html",
+        title="Orders",
+        orders=order_items,
+        search=search,
+        status_filter=status_filter,
+    )
+
+
+@admin_bp.get("/orders/<order_id>")
+@admin_required
+def order_detail(order_id):
+    order = (
+        Order.query.options(
+            joinedload(Order.user).joinedload(User.profile),
+            joinedload(Order.address),
+            joinedload(Order.items),
+        )
+        .filter_by(id=order_id)
+        .first_or_404()
+    )
+    return render_template(
+        "admin/order_detail.html",
+        title="Order Detail",
+        order=order,
     )
 
 

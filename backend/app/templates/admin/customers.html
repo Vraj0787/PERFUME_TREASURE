@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero">
+    <div class="top-actions">
+      <div>
+        <div class="eyebrow">PERFUME TREASURE</div>
+        <h1>Customers</h1>
+        <p>Review account activity, addresses, and loyalty balances.</p>
+      </div>
+      <a class="button secondary" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <form class="filter-form customers-filter" method="get" action="{{ url_for('admin.customers') }}">
+      <input type="text" name="search" value="{{ search }}" placeholder="Search by email or customer name" />
+      <button type="submit">Filter</button>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Loyalty Points</th>
+          <th>Addresses</th>
+          <th>Orders</th>
+          <th>Joined</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in customers %}
+          <tr>
+            <td>{{ customer.profile.full_name if customer.profile else 'No profile' }}</td>
+            <td>{{ customer.email }}</td>
+            <td>{{ customer.loyalty_points_balance }}</td>
+            <td>{{ customer.addresses|length }}</td>
+            <td>{{ customer.orders|length }}</td>
+            <td>{{ customer.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="actions">
+              <a class="button" href="{{ url_for('admin.customer_detail', customer_id=customer.id) }}">View</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7">No customers found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

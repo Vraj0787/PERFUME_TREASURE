@@ -1,0 +1,96 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero">
+    <div class="top-actions">
+      <div>
+        <div class="eyebrow">PERFUME TREASURE</div>
+        <h1>{{ customer.profile.full_name if customer.profile else customer.email }}</h1>
+        <p>{{ customer.email }}</p>
+      </div>
+      <a class="button secondary" href="{{ url_for('admin.customers') }}">Back to Customers</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">LOYALTY POINTS</div>
+      <div class="stat-value">{{ customer.loyalty_points_balance }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ORDERS</div>
+      <div class="stat-value">{{ customer.orders|length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ADDRESSES</div>
+      <div class="stat-value">{{ customer.addresses|length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ACCOUNT STATUS</div>
+      <div class="stat-value">{{ 'Active' if customer.is_active else 'Inactive' }}</div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Profile</h2>
+      <p><strong>Name:</strong> {{ customer.profile.full_name if customer.profile else 'N/A' }}</p>
+      <p><strong>Phone:</strong> {{ customer.profile.phone if customer.profile and customer.profile.phone else 'N/A' }}</p>
+      <p><strong>Joined:</strong> {{ customer.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Addresses</h2>
+      {% for address in customer.addresses %}
+        <div class="detail-block">
+          <strong>{{ address.full_name }}</strong>
+          <div>{{ address.line1 }}{% if address.line2 %}, {{ address.line2 }}{% endif %}</div>
+          <div>{{ address.city }}, {{ address.state or '' }} {{ address.postal_code }}</div>
+          <div>{{ address.country }}</div>
+          <div>{{ address.phone or 'No phone' }}</div>
+          {% if address.is_default %}
+            <div><span class="badge gold">Default</span></div>
+          {% endif %}
+        </div>
+      {% else %}
+        <p>No addresses saved.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <h2>Orders</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Total</th>
+          <th>Points</th>
+          <th>Created</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in customer.orders %}
+          <tr>
+            <td>{{ order.id[:8] }}...</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.payment_status }}</td>
+            <td>${{ '%.2f'|format(order.total_amount) }}</td>
+            <td>+{{ order.points_earned }} / -{{ order.points_redeemed }}</td>
+            <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="actions">
+              <a class="button" href="{{ url_for('admin.order_detail', order_id=order.id) }}">View</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7">No orders found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

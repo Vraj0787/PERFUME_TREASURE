@@ -2,7 +2,7 @@ import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
-const API_BASE_URL = `http://${API_HOST}:5000/api`;
+const API_BASE_URL = `http://${API_HOST}:5001/api`;
 const AUTH_TOKEN_KEY = 'perfume_treasure.auth_token';
 
 let authToken = '';

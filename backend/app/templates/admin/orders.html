@@ -1,0 +1,65 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero">
+    <div class="top-actions">
+      <div>
+        <div class="eyebrow">PERFUME TREASURE</div>
+        <h1>Orders</h1>
+        <p>Track purchases, payment status, and loyalty point usage.</p>
+      </div>
+      <a class="button secondary" href="{{ url_for('admin.dashboard') }}">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <form class="filter-form" method="get" action="{{ url_for('admin.orders') }}">
+      <input type="text" name="search" value="{{ search }}" placeholder="Search by order ID or customer email" />
+      <select name="status">
+        <option value="">All statuses</option>
+        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      </select>
+      <button type="submit">Filter</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Points</th>
+          <th>Created</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>{{ order.id[:8] }}...</td>
+            <td>{{ order.user.profile.full_name if order.user and order.user.profile else order.user.email if order.user else 'Unknown' }}</td>
+            <td><span class="badge {{ 'green' if order.status in ['confirmed', 'completed'] else 'gold' if order.status == 'pending' else 'red' }}">{{ order.status }}</span></td>
+            <td>{{ order.payment_status }}</td>
+            <td>{{ order.items|length }}</td>
+            <td>${{ '%.2f'|format(order.total_amount) }}</td>
+            <td>+{{ order.points_earned }} / -{{ order.points_redeemed }}</td>
+            <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="actions">
+              <a class="button" href="{{ url_for('admin.order_detail', order_id=order.id) }}">View</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9">No orders found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

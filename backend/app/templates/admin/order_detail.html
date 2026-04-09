@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero">
+    <div class="top-actions">
+      <div>
+        <div class="eyebrow">PERFUME TREASURE</div>
+        <h1>Order {{ order.id[:8] }}...</h1>
+        <p>{{ order.user.profile.full_name if order.user and order.user.profile else order.user.email if order.user else 'Unknown customer' }}</p>
+      </div>
+      <a class="button secondary" href="{{ url_for('admin.orders') }}">Back to Orders</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">TOTAL</div>
+      <div class="stat-value">${{ '%.2f'|format(order.total_amount) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">STATUS</div>
+      <div class="stat-value">{{ order.status }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">PAYMENT</div>
+      <div class="stat-value">{{ order.payment_status }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">POINTS</div>
+      <div class="stat-value">+{{ order.points_earned }}/-{{ order.points_redeemed }}</div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>Order Summary</h2>
+      <p><strong>Payment method:</strong> {{ order.payment_method or 'N/A' }}</p>
+      <p><strong>Transaction reference:</strong> {{ order.transaction_reference or 'N/A' }}</p>
+      <p><strong>Subtotal:</strong> ${{ '%.2f'|format(order.subtotal) }}</p>
+      <p><strong>Shipping:</strong> ${{ '%.2f'|format(order.shipping_amount) }}</p>
+      <p><strong>Tax:</strong> ${{ '%.2f'|format(order.tax_amount) }}</p>
+      <p><strong>Placed:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Shipping Address</h2>
+      {% if order.address %}
+        <p><strong>{{ order.address.full_name }}</strong></p>
+        <p>{{ order.address.line1 }}{% if order.address.line2 %}, {{ order.address.line2 }}{% endif %}</p>
+        <p>{{ order.address.city }}, {{ order.address.state or '' }} {{ order.address.postal_code }}</p>
+        <p>{{ order.address.country }}</p>
+        <p>{{ order.address.phone or 'No phone' }}</p>
+      {% else %}
+        <p>No address attached to this order.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <h2>Items</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Line Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ '%.2f'|format(item.unit_price) }}</td>
+            <td>${{ '%.2f'|format(item.unit_price * item.quantity) }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="4">No items found for this order.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

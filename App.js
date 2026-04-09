@@ -258,6 +258,7 @@ function App() {
             {props => (
               <ProductDetailScreen
                 {...props}
+                cartCount={cartCount}
                 onAddToCart={handleAddToCart}
                 isFavorited={isFavorited}
                 onToggleFavorite={handleToggleFavorite}
