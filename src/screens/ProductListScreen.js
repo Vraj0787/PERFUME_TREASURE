@@ -19,7 +19,7 @@ const sortOptions = [
   {label: 'Name A-Z', value: 'name_asc'},
 ];
 
-function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
+function ProductListScreen({navigation, route}) {
   const selectedCategory = route.params?.category || 'Shop All';
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('price_asc');
@@ -153,21 +153,9 @@ function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
               ]}>
               <Image source={{uri: product.image}} style={styles.productImage} />
               <View style={styles.productInfo}>
-                <View style={styles.productInfoRow}>
-                  <View style={styles.productTextWrap}>
-                    <Text style={styles.productCategory}>{product.category}</Text>
-                    <Text style={styles.productName}>{product.name}</Text>
-                    <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
-                  </View>
-                  <Pressable
-                    onPress={() => onToggleFavorite(product)}
-                    style={styles.heartButton}
-                    hitSlop={8}>
-                    <Text style={styles.heartIcon}>
-                      {isFavorited(product.id) ? '❤️' : '🤍'}
-                    </Text>
-                  </Pressable>
-                </View>
+                <Text style={styles.productCategory}>{product.category}</Text>
+                <Text style={styles.productName}>{product.name}</Text>
+                <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
               </View>
             </Pressable>
           ))
@@ -337,29 +325,6 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     padding: 16,
-  },
-  productInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  productTextWrap: {
-    flex: 1,
-    marginRight: 10,
-  },
-  heartButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: palette.ivory,
-    borderWidth: 1,
-    borderColor: palette.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
-  heartIcon: {
-    fontSize: 20,
   },
   productCategory: {
     color: '#8e7a53',

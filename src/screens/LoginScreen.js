@@ -12,39 +12,43 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {loginUser} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function LoginScreen({navigation, onLoginSuccess}) {
+function LoginScreen({navigation, registeredUser}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Missing Fields', 'Please enter your email and password.');
       return;
     }
 
+    if (!registeredUser) {
+      Alert.alert('Invalid Login', 'No account found. Please sign up first.');
+      return;
+    }
+
     setLoading(true);
 
-    try {
-      const loginPayload = await loginUser({
-        email: email.trim().toLowerCase(),
-        password,
-      });
+    setTimeout(() => {
+      const emailMatches =
+        registeredUser.email.toLowerCase() === email.trim().toLowerCase();
+      const passwordMatches = registeredUser.password === password;
 
-      onLoginSuccess?.(loginPayload?.user || null);
+      setLoading(false);
+
+      if (!emailMatches || !passwordMatches) {
+        Alert.alert('Invalid Login', 'The email or password you entered is incorrect.');
+        return;
+      }
 
       navigation.replace('Home', {
-        name: loginPayload?.user?.profile?.full_name || 'Guest',
-        email: loginPayload?.user?.email || email.trim().toLowerCase(),
+        name: registeredUser.name,
+        email: registeredUser.email,
       });
-    } catch (error) {
-      Alert.alert('Invalid Login', error.message || 'The email or password is incorrect.');
-    } finally {
-      setLoading(false);
-    }
+    }, 1000);
   };
 
   return (

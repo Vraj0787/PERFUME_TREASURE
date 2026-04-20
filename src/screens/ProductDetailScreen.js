@@ -11,11 +11,9 @@ import {
 
 import {palette} from '../theme';
 
-function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onToggleFavorite}) {
+function ProductDetailScreen({navigation, route, onAddToCart}) {
   const product = route.params?.product;
   const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
-  const favorited = isFavorited?.(product?.id);
 
   if (!product) {
     return (
@@ -33,28 +31,17 @@ function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onTog
     setQuantity(currentQuantity => currentQuantity + 1);
   };
 
-  const handleAddToCart = async () => {
-    try {
-      setAdding(true);
-      await onAddToCart(product, quantity);
-      Alert.alert('Added to Cart', `${quantity} x ${product.name} added to your cart.`);
-    } catch (error) {
-      Alert.alert('Add to Cart Failed', error.message || 'Unable to add item to cart.');
-    } finally {
-      setAdding(false);
-    }
+  const handleAddToCart = () => {
+    onAddToCart(product, quantity);
+    Alert.alert('Added to Cart', `${quantity} x ${product.name} added to your cart.`);
   };
 
-  const handleBuyNow = async () => {
-    try {
-      setAdding(true);
-      await onAddToCart(product, quantity);
-      navigation.navigate('Cart');
-    } catch (error) {
-      Alert.alert('Buy Now Failed', error.message || 'Unable to continue to checkout.');
-    } finally {
-      setAdding(false);
-    }
+  const handleBuyNow = () => {
+    onAddToCart(product, quantity);
+    Alert.alert(
+      'Ready to Checkout',
+      `${quantity} x ${product.name} has been added to your cart. Checkout can be connected next.`,
+    );
   };
 
   return (
@@ -64,19 +51,9 @@ function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onTog
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <Pressable onPress={() => navigation.goBack()}>
-              <Text style={styles.backText}>Back</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => onToggleFavorite?.(product)}
-              style={[styles.heartButton, favorited ? styles.heartButtonActive : null]}
-              hitSlop={8}>
-              <Text style={styles.heartIcon}>
-                {favorited ? '❤️' : '🤍'}
-              </Text>
-            </Pressable>
-          </View>
+          <Pressable onPress={() => navigation.goBack()}>
+            <Text style={styles.backText}>Back</Text>
+          </Pressable>
           <Text style={styles.brandText}>PERFUME TREASURE</Text>
         </View>
 
@@ -106,9 +83,8 @@ function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onTog
             style={({pressed}) => [
               styles.primaryButton,
               pressed ? styles.buttonPressed : null,
-            ]}
-            disabled={adding}>
-            <Text style={styles.primaryButtonText}>{adding ? 'Adding...' : 'Add to Cart'}</Text>
+            ]}>
+            <Text style={styles.primaryButtonText}>Add to Cart</Text>
           </Pressable>
 
           <Pressable
@@ -116,8 +92,7 @@ function ProductDetailScreen({navigation, route, onAddToCart, isFavorited, onTog
             style={({pressed}) => [
               styles.secondaryButton,
               pressed ? styles.buttonPressed : null,
-            ]}
-            disabled={adding}>
+            ]}>
             <Text style={styles.secondaryButtonText}>Buy Now</Text>
           </Pressable>
         </View>
@@ -150,29 +125,6 @@ const styles = StyleSheet.create({
     paddingTop: 46,
     paddingHorizontal: 18,
     paddingBottom: 18,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  heartButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: palette.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heartButtonActive: {
-    backgroundColor: '#fff0f0',
-    borderColor: '#f8cece',
-  },
-  heartIcon: {
-    fontSize: 22,
   },
   backText: {
     color: palette.goldSoft,

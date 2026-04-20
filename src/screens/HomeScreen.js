@@ -13,22 +13,13 @@ import {
 import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function HomeScreen({
-  navigation,
-  route,
-  cartCount,
-  onLogout,
-  currentUser,
-  favoritesCount,
-  isFavorited,
-  onToggleFavorite,
-}) {
-  const displayName = currentUser?.profile?.full_name || route.params?.name || 'Guest';
-  const displayEmail = currentUser?.email || route.params?.email || `${displayName}@perfume.com`;
+function HomeScreen({navigation, route, cartCount}) {
+  const userName = route.params?.name || 'Guest';
   const [categoryCards, setCategoryCards] = useState([]);
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [bestSellers, setBestSellers] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -39,6 +30,11 @@ function HomeScreen({
           fetchCategories(),
           fetchFeaturedProducts(),
         ]);
+
+        // TEMP best sellers (sort featured or all products if available)
+        // CHANGE LATER
+        const sorted = [...featuredResponse].sort((a, b) => b.price - a.price);
+        setBestSellers(sorted.slice(0, 3)); // top 3
 
         if (!isMounted) {
           return;
@@ -109,11 +105,9 @@ function HomeScreen({
               <View style={styles.menuLine} />
               <View style={styles.menuLine} />
             </Pressable>
-            <Pressable
-              onPress={() => navigation.navigate('Cart')}
-              style={({pressed}) => [styles.cartPill, pressed ? styles.cartPillPressed : null]}>
+            <View style={styles.cartPill}>
               <Text style={styles.cartText}>Cart {cartCount}</Text>
-            </Pressable>
+            </View>
           </View>
           <View style={styles.statusRow}>
             <View style={styles.statusPill}>
@@ -134,20 +128,46 @@ function HomeScreen({
 
         <View style={styles.welcomeCard}>
           <Text style={styles.welcomeTitle}>Welcome back!</Text>
-          <Text style={styles.welcomeEmail}>{displayEmail}</Text>
-                <Text style={styles.welcomePoints}>
-                  Loyalty Points: {Number(currentUser?.loyalty_points_balance || 0)}
-                </Text>
-
+          <Text style={styles.welcomeEmail}>
+            {route.params?.email || `${userName}@perfume.com`}
+          </Text>
           <Pressable
-            onPress={() => {
-              onLogout?.();
-              navigation.replace('Login');
-            }}
+            onPress={() => navigation.replace('Login')}
             style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
             <Text style={styles.buttonText}>Log Out</Text>
           </Pressable>
         </View>
+
+        <Text style={styles.sectionLabel}>BEST SELLERS</Text>
+        {bestSellers.length === 0 ? (
+          <View style={styles.loadingWrap}>
+            <Text style={styles.emptyText}>Best sellers will appear here.</Text>
+          </View>
+        ) : (
+          bestSellers.map(product => (
+            <Pressable
+              key={product.id}
+              onPress={() =>
+                navigation.navigate('ProductDetail', { product })
+              }
+              style={({pressed}) => [
+                styles.featureCard,
+                pressed ? styles.featureCardPressed : null,
+              ]}>
+              <Image source={{uri: product.image}} style={styles.featureImage} />
+              <View style={styles.featureCopy}>
+                <Text style={styles.featureTitle}>{product.name}</Text>
+                <Text style={styles.featureMeta}>{product.category}</Text>
+                <Text numberOfLines={2} style={styles.featureDescription}>
+                  {product.description}
+                </Text>
+                <Text style={styles.featurePrice}>
+                  ${product.price.toFixed(2)}
+                </Text>
+              </View>
+            </Pressable>
+          ))
+        )}
 
         <Text style={styles.sectionLabel}>SHOP BY CATEGORY</Text>
         <View style={styles.categoryRow}>
@@ -174,36 +194,26 @@ function HomeScreen({
             <ActivityIndicator color={palette.gold} />
           </View>
         ) : featuredProduct ? (
-          <View style={styles.featureCard}>
-            <Pressable
-              onPress={() =>
-                navigation.navigate('ProductDetail', {
-                  product: featuredProduct,
-                })
-              }
-              style={({pressed}) => [
-                styles.featureCardPressable,
-                pressed ? styles.featureCardPressed : null,
-              ]}>
-              <Image source={{uri: featuredProduct.image}} style={styles.featureImage} />
-              <View style={styles.featureCopy}>
-                <Text style={styles.featureTitle}>{featuredProduct.name}</Text>
-                <Text style={styles.featureMeta}>{featuredProduct.category}</Text>
-                <Text numberOfLines={2} style={styles.featureDescription}>
-                  {featuredProduct.description}
-                </Text>
-                <Text style={styles.featurePrice}>${featuredProduct.price.toFixed(2)}</Text>
-              </View>
-            </Pressable>
-            <Pressable
-              onPress={() => onToggleFavorite(featuredProduct)}
-              style={styles.featureHeartButton}
-              hitSlop={8}>
-              <Text style={styles.featureHeartIcon}>
-                {isFavorited(featuredProduct.id) ? '❤️' : '🤍'}
+          <Pressable
+            onPress={() =>
+              navigation.navigate('ProductDetail', {
+                product: featuredProduct,
+              })
+            }
+            style={({pressed}) => [
+              styles.featureCard,
+              pressed ? styles.featureCardPressed : null,
+            ]}>
+            <Image source={{uri: featuredProduct.image}} style={styles.featureImage} />
+            <View style={styles.featureCopy}>
+              <Text style={styles.featureTitle}>{featuredProduct.name}</Text>
+              <Text style={styles.featureMeta}>{featuredProduct.category}</Text>
+              <Text numberOfLines={2} style={styles.featureDescription}>
+                {featuredProduct.description}
               </Text>
-            </Pressable>
-          </View>
+              <Text style={styles.featurePrice}>${featuredProduct.price.toFixed(2)}</Text>
+            </View>
+          </Pressable>
         ) : (
           <View style={styles.loadingWrap}>
             <Text style={styles.emptyText}>Featured fragrances will appear here.</Text>
@@ -236,16 +246,6 @@ function HomeScreen({
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
-                navigation.navigate('Favorites');
-              }}
-              style={styles.menuItem}>
-              <Text style={styles.menuItemText}>
-                My Favorites{favoritesCount > 0 ? ` (${favoritesCount})` : ''}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setMenuVisible(false);
                 navigation.navigate('FAQ');
               }}
               style={styles.menuItem}>
@@ -266,14 +266,6 @@ function HomeScreen({
               }}
               style={styles.menuItem}>
               <Text style={styles.menuItemText}>Review</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setMenuVisible(false);
-                navigation.navigate('OrderHistory');
-              }}
-              style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Orders</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -347,9 +339,6 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     backgroundColor: '#2a1a16',
   },
-  cartPillPressed: {
-    opacity: 0.92,
-  },
   cartText: {
     color: '#f0dfb1',
     fontSize: 12,
@@ -410,11 +399,6 @@ const styles = StyleSheet.create({
     color: '#8b7d63',
     fontSize: 14,
     marginBottom: 14,
-  },
-  welcomePoints: {
-    color: '#7b6b51',
-    fontSize: 14,
-    marginBottom: 12,
   },
   button: {
     height: 52,
@@ -486,6 +470,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     borderRadius: 16,
     padding: 14,
+    flexDirection: 'row',
     borderWidth: 1,
     borderColor: '#ede3ca',
     shadowColor: '#000000',
@@ -493,23 +478,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 14,
     elevation: 3,
-  },
-  featureCardPressable: {
-    flexDirection: 'row',
-  },
-  featureHeartButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  featureHeartIcon: {
-    fontSize: 16,
   },
   featureImage: {
     width: 72,

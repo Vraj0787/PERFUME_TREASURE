@@ -29,7 +29,7 @@ function ResetPasswordScreen({navigation, onResetPassword, route}) {
       return;
     }
 
-    onResetPassword?.(newPassword);
+    onResetPassword(newPassword);
 
     Alert.alert('Password Updated', 'Your password has been changed successfully.', [
       {

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Integer, String
+from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -11,7 +11,6 @@ class User(BaseModel):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    loyalty_points_balance: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     profile = relationship(
         "Profile",

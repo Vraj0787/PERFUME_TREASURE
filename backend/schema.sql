@@ -3,7 +3,6 @@ create table users (
   email varchar(255) not null unique,
   password_hash varchar(255) not null,
   is_active boolean not null default true,
-  loyalty_points_balance int not null default 0,
   created_at datetime not null default current_timestamp,
   updated_at datetime not null default current_timestamp on update current_timestamp
 );
@@ -93,8 +92,6 @@ create table orders (
   shipping_amount decimal(10, 2) not null default 0,
   tax_amount decimal(10, 2) not null default 0,
   total_amount decimal(10, 2) not null,
-  points_earned int not null default 0,
-  points_redeemed int not null default 0,
   payment_method varchar(64),
   transaction_reference varchar(255),
   created_at datetime not null default current_timestamp,
