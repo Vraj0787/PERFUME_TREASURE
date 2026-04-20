@@ -19,6 +19,7 @@ function HomeScreen({navigation, route, cartCount}) {
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [bestSellers, setBestSellers] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -29,6 +30,11 @@ function HomeScreen({navigation, route, cartCount}) {
           fetchCategories(),
           fetchFeaturedProducts(),
         ]);
+
+        // TEMP best sellers (sort featured or all products if available)
+        // CHANGE LATER
+        const sorted = [...featuredResponse].sort((a, b) => b.price - a.price);
+        setBestSellers(sorted.slice(0, 3)); // top 3
 
         if (!isMounted) {
           return;
@@ -125,13 +131,43 @@ function HomeScreen({navigation, route, cartCount}) {
           <Text style={styles.welcomeEmail}>
             {route.params?.email || `${userName}@perfume.com`}
           </Text>
-
           <Pressable
             onPress={() => navigation.replace('Login')}
             style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
             <Text style={styles.buttonText}>Log Out</Text>
           </Pressable>
         </View>
+
+        <Text style={styles.sectionLabel}>BEST SELLERS</Text>
+        {bestSellers.length === 0 ? (
+          <View style={styles.loadingWrap}>
+            <Text style={styles.emptyText}>Best sellers will appear here.</Text>
+          </View>
+        ) : (
+          bestSellers.map(product => (
+            <Pressable
+              key={product.id}
+              onPress={() =>
+                navigation.navigate('ProductDetail', { product })
+              }
+              style={({pressed}) => [
+                styles.featureCard,
+                pressed ? styles.featureCardPressed : null,
+              ]}>
+              <Image source={{uri: product.image}} style={styles.featureImage} />
+              <View style={styles.featureCopy}>
+                <Text style={styles.featureTitle}>{product.name}</Text>
+                <Text style={styles.featureMeta}>{product.category}</Text>
+                <Text numberOfLines={2} style={styles.featureDescription}>
+                  {product.description}
+                </Text>
+                <Text style={styles.featurePrice}>
+                  ${product.price.toFixed(2)}
+                </Text>
+              </View>
+            </Pressable>
+          ))
+        )}
 
         <Text style={styles.sectionLabel}>SHOP BY CATEGORY</Text>
         <View style={styles.categoryRow}>
