@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero-card">
+    <div class="eyebrow">Orders</div>
+    <h1>Orders</h1>
+    <p>Review orders, customer details, shipping addresses, and purchased items.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-head">
+      <div>
+        <h2>Order Management</h2>
+        <p>Filter and inspect customer orders.</p>
+      </div>
+    </div>
+    <form class="filter-form" method="get" action="{{ url_for('admin.orders') }}">
+      <input type="text" name="search" value="{{ search }}" placeholder="Search by customer email" />
+      <select name="status">
+        <option value="">All statuses</option>
+        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      </select>
+      <div></div>
+      <button type="submit">Filter</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Total</th>
+          <th>Points</th>
+          <th>Created</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.user.email }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.payment_status }}</td>
+            <td>${{ '%.2f'|format(order.total_amount) }}</td>
+            <td>{{ order.points_earned }}</td>
+            <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="actions">
+              <a class="button" href="{{ url_for('admin.order_detail', order_id=order.id) }}">View Details</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

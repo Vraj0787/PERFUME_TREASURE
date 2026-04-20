@@ -3,7 +3,9 @@ import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import {palette} from '../theme';
 
-function LoyaltyPointsScreen({navigation}) {
+function LoyaltyPointsScreen({navigation, currentUser}) {
+  const pointsBalance = Number(currentUser?.loyalty_points_balance || 0);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -19,7 +21,7 @@ function LoyaltyPointsScreen({navigation}) {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Current Balance</Text>
-          <Text style={styles.pointsValue}>320 Points</Text>
+          <Text style={styles.pointsValue}>{pointsBalance} Points</Text>
           <Text style={styles.cardNote}>
             Keep shopping to unlock exclusive samples, member pricing, and gift sets.
           </Text>
