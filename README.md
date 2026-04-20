@@ -1,13 +1,14 @@
 # Perfume Treasure
 
-React Native mobile app for the `Perfume Treasure` login, signup, and home flow.
+React Native mobile app for the `Perfume Treasure` storefront and account flow.
 
 ## What Is Included
 
 - Login screen
 - Signup screen
-- Forgot password demo flow
+- Backend-connected login, signup, and password reset flow
 - Home screen
+- Product browsing and detail flow
 - React Navigation screen flow
 - Black, gold, and ivory perfume-themed UI
 
@@ -115,11 +116,11 @@ Use this to quickly verify the app after setup:
 2. On the Login screen, tap `Log In` with empty fields and confirm an alert appears.
 3. Tap `Sign Up`.
 4. Create an account with name, email, password, and confirm password.
-5. Confirm successful signup.
-6. Return to Login and sign in with the same credentials.
-7. Confirm the app opens the Home screen.
-8. Tap `Log Out` and confirm it returns to Login.
-9. Tap `Forgot Password?` and test the demo reset flow.
+5. Confirm the app opens the Home screen.
+6. Tap `Log Out` and sign back in with the same credentials.
+7. Confirm the app opens the Home screen again.
+8. Tap `Forgot Password?` and reset the password for that email.
+9. Sign in with the new password.
 
 ## Useful Commands
 
@@ -175,4 +176,4 @@ npm start -- --reset-cache
 
 ## Current Auth State
 
-The current app is using the demo flow for auth-related screens. If the team decides to move to real authentication later, the recommended next step is Supabase Auth with deep linking for password reset.
+The mobile auth screens are connected to the Flask backend in `backend/`. Product browsing is already backend-driven, and cart/checkout/order endpoints are ready for the next phase of UI integration.

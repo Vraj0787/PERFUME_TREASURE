@@ -70,13 +70,13 @@ python run.py
 The API will run on:
 
 ```text
-http://127.0.0.1:5000
+http://127.0.0.1:5001
 ```
 
 Admin dashboard:
 
 ```text
-http://127.0.0.1:5000/admin/login
+http://127.0.0.1:5001/admin/login
 ```
 
 ## Create Tables Quickly
@@ -100,6 +100,7 @@ python seed.py
 
 - `POST /api/auth/signup`
 - `POST /api/auth/login`
+- `POST /api/auth/reset-password`
 - `GET /api/auth/me`
 
 ### Categories
