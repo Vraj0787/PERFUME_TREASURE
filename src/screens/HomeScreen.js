@@ -10,7 +10,6 @@ import {
   View,
 } from 'react-native';
 
-import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
 import {
@@ -266,6 +265,14 @@ function HomeScreen({navigation, route, cartCount}) {
               }}
               style={styles.menuItem}>
               <Text style={styles.menuItemText}>Loyalty Points</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('OrderHistory');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Order History</Text>
             </Pressable>
             <Pressable
               onPress={() => {

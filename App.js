@@ -9,6 +9,8 @@ import FAQScreen from './src/screens/FAQScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
+import OrderDetailScreen from './src/screens/OrderDetailScreen';
+import OrderHistoryScreen from './src/screens/OrderHistoryScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
@@ -118,6 +120,8 @@ function App() {
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+          <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
           <Stack.Screen name="FAQ" component={FAQScreen} />
           <Stack.Screen name="LoyaltyPoints" component={LoyaltyPointsScreen} />
           <Stack.Screen name="Review" component={ReviewScreen} />

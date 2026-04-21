@@ -88,3 +88,27 @@ export async function fetchFeaturedProducts() {
   const response = await request('/products?featured=true');
   return (response.data || []).map(mapProduct);
 }
+
+export async function fetchBestSellers() {
+  const response = await request('/products/products/best-sellers');
+  return (response || []).map(product => ({
+    id: product.id,
+    name: product.name,
+    price: Number(product.price),
+    image:
+      product.image ||
+      'https://via.placeholder.com/400x400.png?text=Perfume+Treasure',
+    description: product.description || '',
+    category: product.category?.name || product.category || 'Shop',
+  }));
+}
+
+export async function fetchOrders() {
+  const response = await request('/orders');
+  return response.data || [];
+}
+
+export async function fetchOrder(orderId) {
+  const response = await request(`/orders/${orderId}`);
+  return response.data;
+}
