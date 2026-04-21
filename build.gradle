@@ -1,0 +1,44 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// app/build.gradle  –  Perfume Treasure
+// Add / merge the dependencies block below into your existing build.gradle.
+// ─────────────────────────────────────────────────────────────────────────────
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.perfumetreasure"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    // ── Firebase ──────────────────────────────────────────────────────────
+    implementation platform('com.google.firebase:firebase-bom:33.1.0')
+    implementation 'com.google.firebase:firebase-auth'           // Authentication
+    implementation 'com.google.firebase:firebase-functions'     // Cloud Functions (email trigger)
+    implementation 'com.google.firebase:firebase-firestore'     // Firestore (user data)
+
+    // ── UI ────────────────────────────────────────────────────────────────
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}
+
+// Apply at BOTTOM of build.gradle (if not already present)
+apply plugin: 'com.google.gms.google-services'

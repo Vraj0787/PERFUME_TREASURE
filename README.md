@@ -1,179 +1,123 @@
-# Perfume Treasure
+# 📦 Perfume Treasure – Welcome Email Feature
 
-React Native mobile app for the `Perfume Treasure` storefront and account flow.
+> Drop-in welcome email system for the **Perfume Treasure** Android app.  
+> Sends a branded HTML email to every new user immediately after sign-up.
 
-## What Is Included
+---
 
-- Login screen
-- Signup screen
-- Backend-connected login, signup, and password reset flow
-- Home screen
-- Product browsing and detail flow
-- React Navigation screen flow
-- Black, gold, and ivory perfume-themed UI
+## 📁 Files Added
 
-## Tech Stack
-
-- React Native
-- JavaScript
-- React Navigation
-- React Native Safe Area Context
-
-## Project Structure
-
-```text
-Perfume_App/
-├── App.js
-├── index.js
-├── src/
-│   ├── assets/
-│   ├── screens/
-│   └── theme.js
-├── android/
-├── ios/
-├── package.json
-└── README.md
+```
+PerfumeTreasure/
+├── app/
+│   ├── build.gradle                              ← Add dependencies here
+│   └── src/
+│       ├── main/
+│       │   ├── java/com/perfumetreasure/
+│       │   │   ├── email/
+│       │   │   │   ├── EmailService.java          ← Interface (swap provider easily)
+│       │   │   │   ├── FirebaseEmailService.java  ← Firebase Cloud Function caller
+│       │   │   │   └── WelcomeEmailTemplate.java  ← HTML + plain-text email builder
+│       │   │   └── ui/auth/
+│       │   │       └── SignUpActivity.java         ← Registration screen
+│       │   └── res/layout/
+│       │       └── activity_sign_up.xml           ← Sign-up UI layout
+│       └── test/java/com/perfumetreasure/email/
+│           └── WelcomeEmailTemplateTest.java      ← Unit tests
+└── functions/
+    ├── index.js                                   ← Firebase Cloud Function (Node.js)
+    └── package.json
 ```
 
-## Prerequisites
+---
 
-Each teammate should install these first:
+## 🚀 Integration Steps
 
-- Node.js
-- npm
-- Xcode for iOS development
-- Android Studio for Android development
-- CocoaPods for iOS dependencies
-- A running iOS Simulator or Android Emulator, or a physical device
+### 1. Android – Add Firebase to your project
+1. Go to [Firebase Console](https://console.firebase.google.com) → your project.
+2. Download `google-services.json` → place in `app/`.
+3. In your **root** `build.gradle`, confirm:
+   ```groovy
+   classpath 'com.google.gms:google-services:4.4.2'
+   ```
+4. Merge the `dependencies {}` block from `app/build.gradle` into your existing file.
 
-Helpful official setup guide:
+### 2. Android – Copy Java source files
+Copy these packages into your existing source tree (adjust the root package if yours differs from `com.perfumetreasure`):
 
-- [React Native environment setup](https://reactnative.dev/docs/environment-setup)
+- `email/EmailService.java`
+- `email/FirebaseEmailService.java`
+- `email/WelcomeEmailTemplate.java`
+- `ui/auth/SignUpActivity.java`
 
-## Clone And Install
+If you already have a `SignUpActivity`, integrate the email trigger from the **"Sign-up flow"** section (lines ~60–100 of `SignUpActivity.java`).
 
+### 3. Android – Register activity in AndroidManifest.xml
+```xml
+<activity android:name=".ui.auth.SignUpActivity" />
+```
+
+### 4. Deploy the Cloud Function
 ```bash
-git clone <your-repo-url>
-cd Perfume_App
+cd functions
 npm install
+firebase login
+firebase use --add          # select your Firebase project
+
+# Set SMTP credentials (example: SendGrid)
+firebase functions:config:set \
+  email.host="smtp.sendgrid.net" \
+  email.port="587" \
+  email.user="apikey" \
+  email.pass="SG.YOUR_KEY_HERE" \
+  email.from="Perfume Treasure <noreply@perfumetreasure.com>"
+
+firebase deploy --only functions
 ```
 
-## iOS Setup
+### 5. Verify
+1. Run the Android app → create a new account.
+2. Check **Firebase Console → Functions → Logs** for `Welcome email sent to …`.
+3. Check the inbox of the test email address.
 
-Run this after cloning the project, and any time native dependencies change:
+---
+
+## 🔌 Swapping the Email Provider
+
+The `EmailService` interface lets you swap delivery backends without touching `SignUpActivity`:
+
+```java
+// Current: Firebase Cloud Function
+EmailService emailService = new FirebaseEmailService();
+
+// Future: direct SMTP, AWS SES, Mailgun, etc.
+// EmailService emailService = new AwsSesEmailService();
+```
+
+---
+
+## 🧪 Running Unit Tests
 
 ```bash
-cd ios
-bundle install
-bundle exec pod install
-cd ..
+./gradlew test
 ```
 
-If `bundle install` is not needed on your machine, you can usually run:
+---
 
-```bash
-cd ios
-bundle exec pod install
-cd ..
-```
+## 🛠 Customization
 
-## Start The App
+| What to change | Where |
+|---|---|
+| Email subject | `WelcomeEmailTemplate.SUBJECT` |
+| Brand color | `WelcomeEmailTemplate.BRAND_COLOR` |
+| Email HTML content | `WelcomeEmailTemplate.buildHtmlBody()` |
+| Support email address | `WelcomeEmailTemplate.SUPPORT_EMAIL` |
+| SMTP provider | `functions/index.js` + Firebase config |
 
-Start Metro in one terminal:
+---
 
-```bash
-npm start
-```
+## 📋 Requirements
 
-Keep that terminal open.
-
-### Run On Android
-
-1. Open Android Studio.
-2. Start an emulator from Device Manager, or connect an Android phone with USB debugging enabled.
-3. In a new terminal:
-
-```bash
-cd Perfume_App
-npm run android
-```
-
-### Run On iOS
-
-1. Open Xcode if needed and make sure a simulator is available.
-2. In a new terminal:
-
-```bash
-cd Perfume_App
-npm run ios
-```
-
-## Basic Test Flow
-
-Use this to quickly verify the app after setup:
-
-1. Open the app on iOS or Android.
-2. On the Login screen, tap `Log In` with empty fields and confirm an alert appears.
-3. Tap `Sign Up`.
-4. Create an account with name, email, password, and confirm password.
-5. Confirm the app opens the Home screen.
-6. Tap `Log Out` and sign back in with the same credentials.
-7. Confirm the app opens the Home screen again.
-8. Tap `Forgot Password?` and reset the password for that email.
-9. Sign in with the new password.
-
-## Useful Commands
-
-```bash
-npm start
-npm run android
-npm run ios
-npm test -- --runInBand
-npm run lint
-```
-
-## Troubleshooting
-
-### iOS build issues
-
-Try:
-
-```bash
-cd ios
-bundle exec pod install
-cd ..
-npm run ios
-```
-
-### Android build issues
-
-Check:
-
-- Android Studio is installed
-- An emulator is already running
-- Android SDK is configured correctly
-
-Then rerun:
-
-```bash
-npm run android
-```
-
-### Metro cache issues
-
-If Metro gets stuck, stop it and restart:
-
-```bash
-npm start -- --reset-cache
-```
-
-## Notes For The Team
-
-- Do not commit `node_modules/`
-- Keep `package-lock.json` checked in
-- After dependency changes, run `npm install`
-- After native iOS dependency changes, run `bundle exec pod install` inside `ios/`
-
-## Current Auth State
-
-The mobile auth screens are connected to the Flask backend in `backend/`. Product browsing is already backend-driven, and cart/checkout/order endpoints are ready for the next phase of UI integration.
+- Android minSdk 24+
+- Firebase project with Authentication + Cloud Functions enabled
+- SMTP provider account (SendGrid recommended for production)
