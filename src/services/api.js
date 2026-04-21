@@ -185,6 +185,19 @@ export async function createAddress(payload) {
   return response.data;
 }
 
+export async function updateAddress(addressId, payload) {
+  const response = await request(`/addresses/${addressId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+
+  return response.data;
+}
+
+export async function deleteAddress(addressId) {
+  await request(`/addresses/${addressId}`, {method: 'DELETE'});
+}
+
 export async function fetchCheckoutQuote({addressId, discountCode}) {
   const response = await request('/checkout/quote', {
     method: 'POST',
@@ -227,6 +240,11 @@ export async function createCheckout({
 export async function fetchOrders() {
   const response = await request('/orders');
   return response.data || [];
+}
+
+export async function fetchOrder(orderId) {
+  const response = await request(`/orders/${orderId}`);
+  return response.data;
 }
 
 function mapProduct(product) {

@@ -5,6 +5,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import AddressManagementScreen from './src/screens/AddressManagementScreen';
 import CartScreen from './src/screens/CartScreen';
 import CheckoutScreen from './src/screens/CheckoutScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
@@ -14,6 +15,7 @@ import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
 import OrderConfirmationScreen from './src/screens/OrderConfirmationScreen';
+import OrderDetailScreen from './src/screens/OrderDetailScreen';
 import OrderHistoryScreen from './src/screens/OrderHistoryScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
@@ -270,6 +272,7 @@ function App() {
               />
             )}
           </Stack.Screen>
+          <Stack.Screen name="AddressManagement" component={AddressManagementScreen} />
           <Stack.Screen name="Cart">
             {props => (
               <CartScreen
@@ -292,6 +295,7 @@ function App() {
             component={OrderConfirmationScreen}
           />
           <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+          <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
           <Stack.Screen name="FAQ" component={FAQScreen} />
           <Stack.Screen name="LoyaltyPoints">
             {props => (
