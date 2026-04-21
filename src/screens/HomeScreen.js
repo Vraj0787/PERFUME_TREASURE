@@ -13,6 +13,12 @@ import {
 import {fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
+import {
+  fetchCategories,
+  fetchFeaturedProducts,
+  fetchBestSellers
+} from '../services/api';
+
 function HomeScreen({navigation, route, cartCount}) {
   const userName = route.params?.name || 'Guest';
   const [categoryCards, setCategoryCards] = useState([]);
@@ -26,9 +32,10 @@ function HomeScreen({navigation, route, cartCount}) {
 
     const loadHomeData = async () => {
       try {
-        const [categoryResponse, featuredResponse] = await Promise.all([
+        const [categoryResponse, featuredResponse, bestSellerResponse] = await Promise.all([
           fetchCategories(),
           fetchFeaturedProducts(),
+          fetchBestSellers(),
         ]);
 
         // TEMP best sellers (sort featured or all products if available)
@@ -62,6 +69,7 @@ function HomeScreen({navigation, route, cartCount}) {
           })),
         );
         setFeaturedProduct(featuredResponse[0] || null);
+        setBestSellers(bestSellerResponse);
       } catch (_error) {
         if (!isMounted) {
           return;
@@ -578,3 +586,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+
