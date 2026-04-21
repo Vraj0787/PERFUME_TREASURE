@@ -40,7 +40,6 @@ This file is currently responsible for:
 
 - `POST /api/auth/signup`
 - `POST /api/auth/login`
-- `POST /api/auth/reset-password`
 - `GET /api/auth/me`
 
 ### Categories
@@ -102,7 +101,7 @@ Examples:
 - cart screen to backend cart endpoints
 - checkout screen to backend address and checkout endpoints
 - order confirmation / order history to orders endpoints
-- cart and checkout UI integration to backend auth/token state
+- optional switch from local demo auth to backend auth
 
 ## Local Backend Run Notes
 
@@ -127,7 +126,7 @@ Configured hosts:
 4. Connect address form to `/api/addresses`
 5. Connect place-order action to `/api/checkout`
 6. Build `OrderConfirmationScreen`
-7. Persist auth token locally if you want users to stay signed in across app restarts
+7. Optionally connect login/signup to backend auth after cart and checkout are stable
 
 ## Current Product Categories
 
@@ -138,7 +137,6 @@ Configured hosts:
 
 ## Notes
 
-- Login, signup, and password reset are connected to the backend.
 - Product browsing on Home and Product List is no longer using local mock arrays.
 - The backend has seed data ready for milestone work.
 - Backend setup instructions are documented in:

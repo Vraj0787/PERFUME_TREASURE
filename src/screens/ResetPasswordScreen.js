@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -12,16 +11,14 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {resetPassword} from '../services/api';
 import {logoImage, palette} from '../theme';
 
 function ResetPasswordScreen({navigation, onResetPassword, route}) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const email = route.params?.email || '';
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
       Alert.alert('Missing Fields', 'Please enter and confirm your new password.');
       return;
@@ -32,34 +29,14 @@ function ResetPasswordScreen({navigation, onResetPassword, route}) {
       return;
     }
 
-    if (!email) {
-      Alert.alert('Missing Email', 'Please restart the reset flow and try again.');
-      return;
-    }
+    onResetPassword(newPassword);
 
-    setLoading(true);
-
-    try {
-      const updatedUser = await resetPassword({
-        email: email.trim().toLowerCase(),
-        newPassword,
-      });
-
-      onResetPassword(updatedUser);
-      setLoading(false);
-      Alert.alert('Password Updated', 'Your password has been changed successfully.', [
-        {
-          text: 'Back to Login',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]);
-    } catch (error) {
-      setLoading(false);
-      Alert.alert(
-        'Reset Failed',
-        error.message || 'Unable to update your password right now.',
-      );
-    }
+    Alert.alert('Password Updated', 'Your password has been changed successfully.', [
+      {
+        text: 'Back to Login',
+        onPress: () => navigation.navigate('Login'),
+      },
+    ]);
   };
 
   return (
@@ -108,17 +85,8 @@ function ResetPasswordScreen({navigation, onResetPassword, route}) {
 
           <Pressable
             onPress={handleResetPassword}
-            style={({pressed}) => [
-              styles.button,
-              pressed && !loading ? styles.buttonPressed : null,
-              loading ? styles.buttonDisabled : null,
-            ]}
-            disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color={palette.white} />
-            ) : (
-              <Text style={styles.buttonText}>Update Password</Text>
-            )}
+            style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
+            <Text style={styles.buttonText}>Update Password</Text>
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('Login')}>
@@ -217,9 +185,6 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.92,
-  },
-  buttonDisabled: {
-    opacity: 0.75,
   },
   buttonText: {
     color: palette.white,
