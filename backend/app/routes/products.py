@@ -70,3 +70,4 @@ def get_product(slug):
     if not product:
         return error_response("Product not found", 404)
     return success_response(serialize_product(product))
+
