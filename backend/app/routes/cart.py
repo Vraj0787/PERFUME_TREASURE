@@ -83,7 +83,6 @@ def update_cart_item(item_id):
     return success_response(serialize_cart_item(cart_item), "Cart item updated")
 
 
-
 @cart_bp.delete("/items/<item_id>")
 @jwt_required()
 def delete_cart_item(item_id):
