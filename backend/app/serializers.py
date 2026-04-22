@@ -1,3 +1,4 @@
+import os
 from flask import request
 
 
@@ -7,6 +8,10 @@ def _absolute_image_url(image_url):
     if image_url.startswith("http://") or image_url.startswith("https://"):
         return image_url
     if image_url.startswith("/"):
+        # Use API_BASE_URL from environment or construct from request
+        api_base_url = os.getenv("API_BASE_URL")
+        if api_base_url:
+            return f"{api_base_url.rstrip('/')}{image_url}"
         return f"{request.host_url.rstrip('/')}{image_url}"
     return f"{request.host_url.rstrip('/')}/{image_url}"
 

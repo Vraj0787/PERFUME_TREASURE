@@ -27,7 +27,27 @@ const sortOptions = [
   {label: 'Date, new to old', value: 'date_desc'},
 ];
 
-function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
+function ProductImage({source, style}) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <View style={[style, styles.imagePlaceholder]}>
+        <Text style={styles.imagePlaceholderText}>No image</Text>
+      </View>
+    );
+  }
+
+  return (
+    <Image
+      source={source}
+      style={style}
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
+function ProductListScreen({navigation, route, onToggleFavorite, isFavorited}) {
   const selectedCategory = route.params?.category || 'Shop All';
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('best_selling');
@@ -194,7 +214,7 @@ function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
                 styles.productCard,
                 pressed ? styles.productCardPressed : null,
               ]}>
-              <Image source={{uri: product.image}} style={styles.productImage} />
+              <ProductImage source={{uri: product.image}} style={styles.productImage} />
               <View style={styles.productInfo}>
                 <View style={styles.productInfoRow}>
                   <View style={styles.productTextWrap}>
@@ -504,6 +524,16 @@ const styles = StyleSheet.create({
     color: palette.gold,
     fontSize: 20,
     fontWeight: '700',
+  },
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  imagePlaceholderText: {
+    color: '#999',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
 

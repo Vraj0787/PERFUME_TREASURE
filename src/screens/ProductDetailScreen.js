@@ -23,6 +23,7 @@ function ProductDetailScreen({
   const [adding, setAdding] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [applyOpen, setApplyOpen] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const favorited = isFavorited?.(product?.id);
   const howToApplySteps = (product?.howToApply || '')
     .split('\n')
@@ -99,7 +100,18 @@ function ProductDetailScreen({
         </View>
 
         <View style={styles.heroSection}>
-          <Image source={{uri: product.image}} style={styles.productImage} />
+          {imageError ? (
+            <View style={[styles.productImage, styles.imagePlaceholder]}>
+              <Text style={styles.imagePlaceholderText}>Image not available</Text>
+            </View>
+          ) : (
+            <Image 
+              source={{uri: product.image}} 
+              style={styles.productImage}
+              onError={() => setImageError(true)}
+              onLoad={() => setImageError(false)}
+            />
+          )}
 
           <View style={styles.contentCard}>
             <Text style={styles.productName}>{product.name}</Text>
@@ -475,6 +487,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 28,
     marginBottom: 12,
+  },
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  imagePlaceholderText: {
+    color: '#999',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 
