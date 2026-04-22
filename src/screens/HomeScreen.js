@@ -10,16 +10,20 @@ import {
   View,
 } from 'react-native';
 
+import {fetchBestSellers, fetchCategories, fetchFeaturedProducts} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-import {
-  fetchCategories,
-  fetchFeaturedProducts,
-  fetchBestSellers
-} from '../services/api';
-
-function HomeScreen({navigation, route, cartCount}) {
-  const userName = route.params?.name || 'Guest';
+function HomeScreen({
+  navigation,
+  route,
+  cartCount,
+  currentUser,
+  favoritesCount,
+  onLogout,
+}) {
+  const userName =
+    currentUser?.profile?.full_name || route.params?.name || 'Guest';
+  const userEmail = currentUser?.email || route.params?.email || `${userName}@perfume.com`;
   const [categoryCards, setCategoryCards] = useState([]);
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,11 +40,6 @@ function HomeScreen({navigation, route, cartCount}) {
           fetchFeaturedProducts(),
           fetchBestSellers(),
         ]);
-
-        // TEMP best sellers (sort featured or all products if available)
-        // CHANGE LATER
-        const sorted = [...featuredResponse].sort((a, b) => b.price - a.price);
-        setBestSellers(sorted.slice(0, 3)); // top 3
 
         if (!isMounted) {
           return;
@@ -68,7 +67,7 @@ function HomeScreen({navigation, route, cartCount}) {
           })),
         );
         setFeaturedProduct(featuredResponse[0] || null);
-        setBestSellers(bestSellerResponse);
+        setBestSellers(bestSellerResponse || []);
       } catch (_error) {
         if (!isMounted) {
           return;
@@ -112,9 +111,14 @@ function HomeScreen({navigation, route, cartCount}) {
               <View style={styles.menuLine} />
               <View style={styles.menuLine} />
             </Pressable>
-            <View style={styles.cartPill}>
+            <Pressable
+              onPress={() => navigation.navigate('Cart')}
+              style={({pressed}) => [
+                styles.cartPill,
+                pressed ? styles.cartPillPressed : null,
+              ]}>
               <Text style={styles.cartText}>Cart {cartCount}</Text>
-            </View>
+            </Pressable>
           </View>
           <View style={styles.statusRow}>
             <View style={styles.statusPill}>
@@ -135,11 +139,12 @@ function HomeScreen({navigation, route, cartCount}) {
 
         <View style={styles.welcomeCard}>
           <Text style={styles.welcomeTitle}>Welcome back!</Text>
-          <Text style={styles.welcomeEmail}>
-            {route.params?.email || `${userName}@perfume.com`}
-          </Text>
+          <Text style={styles.welcomeEmail}>{userEmail}</Text>
           <Pressable
-            onPress={() => navigation.replace('Login')}
+            onPress={() => {
+              onLogout();
+              navigation.replace('Login');
+            }}
             style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
             <Text style={styles.buttonText}>Log Out</Text>
           </Pressable>
@@ -253,6 +258,16 @@ function HomeScreen({navigation, route, cartCount}) {
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
+                navigation.navigate('Favorites');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>
+                My Favorites{favoritesCount ? ` (${favoritesCount})` : ''}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
                 navigation.navigate('FAQ');
               }}
               style={styles.menuItem}>
@@ -269,18 +284,18 @@ function HomeScreen({navigation, route, cartCount}) {
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
-                navigation.navigate('OrderHistory');
+                navigation.navigate('Review');
               }}
               style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Order History</Text>
+              <Text style={styles.menuItemText}>Reviews</Text>
             </Pressable>
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
-                navigation.navigate('Review');
+                navigation.navigate('OrderHistory');
               }}
               style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Review</Text>
+              <Text style={styles.menuItemText}>Orders</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -358,6 +373,9 @@ const styles = StyleSheet.create({
     color: '#f0dfb1',
     fontSize: 12,
     fontWeight: '700',
+  },
+  cartPillPressed: {
+    opacity: 0.92,
   },
   brandShowcase: {
     backgroundColor: palette.black,
@@ -593,5 +611,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-
-

@@ -63,28 +63,27 @@ function OrderHistoryScreen({navigation}) {
         ) : orders.length === 0 ? (
           <View style={styles.stateWrap}>
             <Text style={styles.stateTitle}>No orders yet</Text>
-            <Text style={styles.stateText}>Your completed checkouts will appear here.</Text>
+            <Text style={styles.stateText}>
+              Your completed checkouts will appear here.
+            </Text>
           </View>
         ) : (
           <View style={styles.contentWrap}>
             {orders.map(order => (
-              <Pressable
-                key={order.id}
-                onPress={() => navigation.navigate('OrderDetail', {orderId: order.id})}
-                style={({pressed}) => [
-                  styles.orderCard,
-                  pressed ? styles.orderCardPressed : null,
-                ]}>
+              <View key={order.id} style={styles.orderCard}>
                 <Text style={styles.orderId}>Order #{order.id}</Text>
                 <Text style={styles.orderMeta}>
                   Placed: {new Date(order.created_at).toLocaleString()}
                 </Text>
                 <Text style={styles.orderMeta}>Status: {order.status}</Text>
                 <Text style={styles.orderMeta}>Payment: {order.payment_status}</Text>
+                <Text style={styles.orderMeta}>
+                  Points Earned: {Number(order.points_earned || 0)}
+                </Text>
                 <Text style={styles.orderTotal}>
                   Total: ${Number(order.total_amount || 0).toFixed(2)}
                 </Text>
-              </Pressable>
+              </View>
             ))}
           </View>
         )}
@@ -157,9 +156,6 @@ const styles = StyleSheet.create({
     borderColor: palette.border,
     padding: 14,
     marginBottom: 10,
-  },
-  orderCardPressed: {
-    opacity: 0.9,
   },
   orderId: {
     color: palette.charcoal,

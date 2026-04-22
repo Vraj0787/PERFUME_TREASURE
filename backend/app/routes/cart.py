@@ -16,7 +16,11 @@ cart_bp = Blueprint("cart", __name__)
 @jwt_required()
 def get_cart():
     user = get_current_user()
-    cart_items, totals = get_cart_snapshot(user)
+    cart_items, totals = get_cart_snapshot(
+        user,
+        address_id=request.args.get("address_id"),
+        discount_code=request.args.get("discount_code"),
+    )
 
     return success_response(
         {

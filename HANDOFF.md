@@ -1,143 +1,105 @@
 # Perfume Treasure Handoff
 
-## Scope Completed
+## Current State
 
-This handoff covers the parts already completed for:
+This repo contains:
 
-- auth UI flow
-- home screen
-- product browsing flow
-- backend-driven category and product viewing
+- React Native mobile frontend
+- Flask backend
+- MySQL database integration
+- browser admin portal
+- cart / checkout / orders flow
+- favorites
+- best sellers from backend
+- reviews connected to backend
 
-## Screens Already Built
+## Local Access Summary
 
-- `src/screens/LoginScreen.js`
-- `src/screens/SignupScreen.js`
-- `src/screens/ForgotPasswordScreen.js`
-- `src/screens/ResetPasswordScreen.js`
-- `src/screens/HomeScreen.js`
-- `src/screens/ProductListScreen.js`
-- `src/screens/ProductDetailScreen.js`
+### Frontend
 
-## Frontend API Layer
+```bash
+cd /Users/vrajpatel/PERFUME_TREASURE
+npm install
+npm start -- --reset-cache
+npm run ios
+```
 
-- `src/services/api.js`
+### Backend
 
-This file is currently responsible for:
+```bash
+cd /Users/vrajpatel/PERFUME_TREASURE/backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install cryptography
+python seed.py
+python run.py
+```
 
-- loading categories from the backend
-- loading featured products from the backend
-- loading products by category
-- applying backend search and sorting
+### Database
 
-## Backend Location
+- MySQL database name: `perfume_treasure`
+- credentials come from `backend/.env`
 
-- `backend/`
+### Admin
 
-## Backend Endpoints Ready To Use
+- [http://127.0.0.1:5001/admin/login](http://127.0.0.1:5001/admin/login)
 
-### Auth
+## Important Local Config
 
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
+The app currently expects:
 
-### Categories
+- iOS simulator backend host: `127.0.0.1:5001`
+- Android emulator backend host: `10.0.2.2:5001`
 
-- `GET /api/categories`
-- `GET /api/categories/<slug>`
+Configured in:
 
-### Products
+- [src/services/api.js](/Users/vrajpatel/PERFUME_TREASURE/src/services/api.js)
 
-- `GET /api/products`
-- `GET /api/products/<slug>`
+## Main Functional Areas To Test
 
-Supported query params for `/api/products`:
+1. Signup / login / reset password
+2. Home categories / featured / best sellers
+3. Product list and product detail
+4. Favorites
+5. Cart
+6. Checkout
+7. Order history
+8. Product reviews
+9. Admin login and catalog management
 
-- `category`
-- `search`
-- `sort`
-- `featured`
+## Common Issues Teammates May Hit
 
-Examples:
+### Frontend
 
-- `GET /api/products?category=men`
-- `GET /api/products?search=oud`
-- `GET /api/products?sort=price_asc`
-- `GET /api/products?featured=true`
+- `react-native: command not found`
+  - run `npm install`
 
-### Cart
+- AsyncStorage missing
+  - run `npm install @react-native-async-storage/async-storage`
+  - run `bundle exec pod install`
 
-- `GET /api/cart`
-- `POST /api/cart/items`
-- `PATCH /api/cart/items/<item_id>`
-- `DELETE /api/cart/items/<item_id>`
-- `DELETE /api/cart`
+- iOS pod errors
+  - run `cd ios && bundle exec pod install`
 
-### Addresses
+### Backend
 
-- `GET /api/addresses`
-- `POST /api/addresses`
-- `PATCH /api/addresses/<address_id>`
-- `DELETE /api/addresses/<address_id>`
+- `source: no such file or directory: .venv/bin/activate`
+  - create the venv first with `python3 -m venv .venv`
 
-### Checkout / Orders
+- `python: command not found`
+  - use `python3`
 
-- `POST /api/checkout`
-- `GET /api/orders`
-- `GET /api/orders/<order_id>`
+- MySQL access denied
+  - fix `MYSQL_PASSWORD` in `backend/.env`
 
-## What Is Already Connected In The App
+- `cryptography package is required`
+  - `pip install cryptography`
 
-- home categories come from the backend
-- featured product comes from the backend
-- product list comes from the backend
-- search uses backend data
-- sort uses backend data
-- product detail screen receives backend product data
+- Admin returns `Internal server error`
+  - check Flask terminal traceback
 
-## What Still Needs Integration
+## Recommended Docs For Teammates
 
-- cart screen to backend cart endpoints
-- checkout screen to backend address and checkout endpoints
-- order confirmation / order history to orders endpoints
-- optional switch from local demo auth to backend auth
-
-## Local Backend Run Notes
-
-The backend currently runs from:
-
-- `backend/run.py`
-
-Current local API base behavior in:
-
-- `src/services/api.js`
-
-Configured hosts:
-
-- iOS simulator uses `127.0.0.1:5001`
-- Android emulator uses `10.0.2.2:5001`
-
-## Recommended Next Work For Teammates
-
-1. Build `CartScreen`
-2. Connect cart actions to `/api/cart`
-3. Build `CheckoutScreen`
-4. Connect address form to `/api/addresses`
-5. Connect place-order action to `/api/checkout`
-6. Build `OrderConfirmationScreen`
-7. Optionally connect login/signup to backend auth after cart and checkout are stable
-
-## Current Product Categories
-
-- `Men`
-- `Women`
-- `Sets`
-- `Shop All`
-
-## Notes
-
-- Product browsing on Home and Product List is no longer using local mock arrays.
-- The backend has seed data ready for milestone work.
-- Backend setup instructions are documented in:
-  - `backend/README.md`
+- main setup guide: [README.md](/Users/vrajpatel/PERFUME_TREASURE/README.md)
+- backend details: [backend/README.md](/Users/vrajpatel/PERFUME_TREASURE/backend/README.md)
