@@ -1,15 +1,15 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-  <div class="hero-card">
-    <div class="eyebrow">Perfume Treasure</div>
+  <div class="hero">
+    <div class="eyebrow">PERFUME TREASURE</div>
     <h1>{{ title }}</h1>
-    <p>Create or update products, media, variants, inventory, and merchandising details.</p>
+    <p>Create or update product details used by both the app and website.</p>
   </div>
 
   <div class="card">
     <form method="post" action="{{ action_url }}" enctype="multipart/form-data">
-      <div class="grid three">
+      <div class="grid two">
         <div class="field">
           <label for="category_id">CATEGORY</label>
           <select id="category_id" name="category_id">
@@ -17,17 +17,6 @@
             {% for category in categories %}
               <option value="{{ category.id }}" {% if product and product.category_id == category.id %}selected{% endif %}>
                 {{ category.name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="field">
-          <label for="collection_id">COLLECTION</label>
-          <select id="collection_id" name="collection_id">
-            <option value="">Select a collection</option>
-            {% for collection in collections %}
-              <option value="{{ collection.id }}" {% if product and product.collection_id == collection.id %}selected{% endif %}>
-                {{ collection.name }}
               </option>
             {% endfor %}
           </select>
@@ -44,26 +33,15 @@
           <input id="slug" name="slug" type="text" value="{{ product.slug if product else '' }}" />
         </div>
         <div class="field">
-          <label for="subtitle">SUBTITLE</label>
-          <input id="subtitle" name="subtitle" type="text" value="{{ product.subtitle if product and product.subtitle else '' }}" placeholder="Short merchandising line" />
-        </div>
-      </div>
-
-      <div class="grid two">
-        <div class="field">
-          <label for="image_url">PRIMARY IMAGE URL</label>
+          <label for="image_url">IMAGE URL</label>
           <input id="image_url" name="image_url" type="url" value="{{ image_url }}" />
         </div>
-        <div class="field">
-          <label for="image_gallery">MEDIA GALLERY URLS</label>
-          <textarea id="image_gallery" name="image_gallery" rows="4" placeholder="One image URL per line">{{ image_gallery_text }}</textarea>
-        </div>
       </div>
 
       <div class="grid two">
         <div class="field">
-          <label for="image_files">UPLOAD MEDIA</label>
-          <input id="image_files" name="image_files" type="file" accept="image/*" multiple />
+          <label for="image_file">UPLOAD IMAGE</label>
+          <input id="image_file" name="image_file" type="file" accept="image/*" />
         </div>
         <div class="field">
           <label>CURRENT PREVIEW</label>
@@ -78,22 +56,6 @@
       <div class="field">
         <label for="description">DESCRIPTION</label>
         <textarea id="description" name="description" rows="5" required>{{ product.description if product else '' }}</textarea>
-      </div>
-
-      <div class="grid two">
-        <div class="field">
-          <label for="size_label">SIZE LABEL</label>
-          <input id="size_label" name="size_label" type="text" value="{{ product.size_label if product and product.size_label else '' }}" placeholder="100ml (3.4oz)" />
-        </div>
-        <div class="field">
-          <label for="how_to_apply">HOW TO APPLY</label>
-          <textarea id="how_to_apply" name="how_to_apply" rows="5" placeholder="One step per line">{{ product.how_to_apply if product and product.how_to_apply else '' }}</textarea>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="variant_lines">VARIANTS</label>
-        <textarea id="variant_lines" name="variant_lines" rows="6" placeholder="Title|SKU|Size|Price|Stock|default&#10;50ml|SKU-50|50ml|59.99|14|default&#10;100ml|SKU-100|100ml|89.99|8">{{ variant_lines }}</textarea>
       </div>
 
       <div class="grid two">

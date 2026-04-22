@@ -6,194 +6,47 @@
     <title>{{ title or "Perfume Treasure Admin" }}</title>
     <style>
       :root {
-        --bg: #fffaf2;
-        --surface: #ffffff;
-        --surface-soft: #f6efe4;
-        --surface-strong: #f2e4c7;
-        --line: #e8d8b3;
-        --line-strong: #d7bc7a;
-        --text: #1c1c1c;
-        --muted: #8d7f68;
         --black: #121212;
-        --charcoal: #1c1c1c;
         --gold: #c9a34a;
         --gold-soft: #e2c67a;
-        --accent: #c9a34a;
-        --accent-soft: #f5ecd6;
-        --success: #e7f1dd;
-        --danger: #f8e4de;
-        --sidebar: #121212;
+        --cream: #f6efe4;
+        --ivory: #fffaf2;
+        --border: #e8d8b3;
+        --text-muted: #7b6b51;
       }
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        font-family: "Avenir Next", "Futura", "Trebuchet MS", sans-serif;
-        background:
-          radial-gradient(circle at top right, rgba(201, 163, 74, 0.16), transparent 24%),
-          linear-gradient(180deg, #fffaf2 0%, #f6efe4 100%);
-        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--ivory);
+        color: var(--black);
       }
-      .admin-shell {
-        min-height: 100vh;
-        display: grid;
-        grid-template-columns: 280px 1fr;
-      }
-      .sidebar {
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
-          linear-gradient(180deg, #121212 0%, #1c1c1c 100%);
-        color: white;
-        padding: 24px 18px 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        border-right: 1px solid rgba(226, 198, 122, 0.16);
-        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
-      }
-      .brand {
-        padding: 4px 10px 18px;
-        border-bottom: 1px solid rgba(226, 198, 122, 0.14);
-      }
-      .brand-lockup {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 10px;
-      }
-      .brand-logo {
-        width: 44px;
-        height: 44px;
-        object-fit: contain;
-        filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.24));
-      }
-      .brand-kicker {
-        color: var(--gold-soft);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-      }
-      .brand-title {
-        font-size: 24px;
-        font-weight: 700;
-        line-height: 1.1;
-      }
-      .brand-note {
-        color: rgba(255, 250, 242, 0.62);
-        font-size: 13px;
-        line-height: 1.5;
-      }
-      .nav-group {
-        display: grid;
-        gap: 8px;
-      }
-      .nav-label {
-        color: rgba(226, 198, 122, 0.5);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1.4px;
-        text-transform: uppercase;
-        padding: 0 10px;
-      }
-      .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 14px;
-        border-radius: 14px;
-        color: rgba(255, 250, 242, 0.88);
-        text-decoration: none;
-        font-weight: 600;
-        border: 1px solid transparent;
-        transition: 120ms ease;
-      }
-      .nav-link.active,
-      .nav-link:hover {
-        background: rgba(226, 198, 122, 0.12);
-        border-color: rgba(226, 198, 122, 0.18);
-        color: white;
-      }
-      .sidebar form {
-        margin-top: auto;
-      }
-      .sidebar button {
-        width: 100%;
-      }
-      .main {
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
         padding: 24px;
       }
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 18px;
-        gap: 18px;
-      }
-      .topbar-brand {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-      .topbar-logo {
-        width: 46px;
-        height: 46px;
-        object-fit: contain;
-        border-radius: 14px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(246,239,228,0.9));
-        border: 1px solid var(--line);
-        padding: 7px;
-        box-shadow: 0 10px 26px rgba(201, 163, 74, 0.12);
-      }
-      .topbar-title h1 {
-        margin: 0;
-        font-size: 30px;
-        letter-spacing: -0.03em;
-      }
-      .topbar-title p {
-        margin: 6px 0 0;
-        color: var(--muted);
-      }
-      .page-content {
-        display: grid;
-        gap: 18px;
-      }
-      .card {
-        background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,239,228,0.72));
-        border: 1px solid var(--line);
+      .hero {
+        background: var(--black);
+        color: white;
         border-radius: 24px;
-        padding: 18px;
-        box-shadow: 0 14px 34px rgba(28, 28, 28, 0.06);
-      }
-      .hero,
-      .hero-card {
-        background:
-          radial-gradient(circle at top left, rgba(226, 198, 122, 0.18), transparent 22%),
-          linear-gradient(135deg, #121212, #1c1c1c 58%, #392a16 100%);
-        color: white;
-        border-radius: 28px;
         padding: 24px;
-        border: 1px solid rgba(226, 198, 122, 0.14);
-        box-shadow: 0 18px 40px rgba(18, 18, 18, 0.18);
+        margin-bottom: 20px;
       }
-      .hero-card .eyebrow,
-      .hero .eyebrow {
+      .eyebrow {
         color: var(--gold-soft);
-        font-size: 11px;
+        font-size: 13px;
+        letter-spacing: 1.5px;
         font-weight: 700;
-        letter-spacing: 2px;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
-      .hero-card h1,
       .hero h1 {
         margin: 0;
         font-size: 34px;
-        letter-spacing: -0.03em;
       }
-      .hero-card p,
       .hero p {
-        margin: 10px 0 0;
-        color: rgba(255, 250, 242, 0.78);
+        margin: 8px 0 0;
+        color: #eadcbb;
       }
       .hero-logo-row {
         display: flex;
@@ -207,11 +60,25 @@
         object-fit: contain;
         filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.22));
       }
+      .card {
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 18px;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .grid.two {
+        grid-template-columns: 1fr 1fr;
+      }
       .flash {
         padding: 12px 14px;
         border-radius: 14px;
         font-weight: 600;
         border: 1px solid transparent;
+        margin-bottom: 16px;
       }
       .flash.success {
         background: var(--success);
@@ -271,246 +138,116 @@
       .field {
         margin-bottom: 14px;
       }
-      .grid {
-        display: grid;
-        gap: 16px;
-      }
-      .grid.two {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      .grid.three {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 14px;
-      }
-      .stat-card {
-        background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(246,239,228,0.9));
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 16px;
-      }
-      .stat-label {
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1.4px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-      }
-      .stat-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--black);
-      }
-      .section-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
-      .section-head h2 {
-        margin: 0;
-        font-size: 20px;
-      }
-      .section-head p {
-        margin: 0;
-        color: var(--muted);
-      }
       table {
         width: 100%;
         border-collapse: collapse;
       }
       th, td {
-        padding: 12px 10px;
+        padding: 12px 8px;
         text-align: left;
-        border-bottom: 1px solid var(--line);
-        vertical-align: top;
+        border-bottom: 1px solid var(--border);
       }
       th {
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1.4px;
-        text-transform: uppercase;
+        color: var(--text-muted);
+        font-size: 12px;
+        letter-spacing: 1px;
       }
       .actions {
         display: flex;
         gap: 8px;
-        flex-wrap: wrap;
         align-items: center;
       }
       .inline-form {
         display: inline;
       }
-      .badge {
-        display: inline-flex;
+      .top-actions {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
+        margin-bottom: 18px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .stat-card {
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+      }
+      .stat-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+      }
+      .stat-value {
+        color: var(--black);
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-block;
         border-radius: 999px;
         padding: 6px 10px;
         font-size: 12px;
         font-weight: 700;
       }
-      .badge.gold { background: #f5ebc8; color: #7b5a11; }
-      .badge.green { background: #e7f1dd; color: #385a2f; }
-      .badge.red { background: #f8e4de; color: #8b3030; }
-      .badge.blue { background: var(--accent-soft); color: #755816; }
+      .badge.gold {
+        background: #f2e2b9;
+        color: #6e5521;
+      }
+      .badge.green {
+        background: #dcefdc;
+        color: #2f6b3d;
+      }
+      .badge.red {
+        background: #f6dddd;
+        color: #8b3030;
+      }
       .filter-form {
         display: grid;
-        grid-template-columns: 1.6fr 1fr 1fr auto;
+        grid-template-columns: 1.5fr 1fr 1fr auto;
         gap: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
       }
-      .split {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 18px;
+      .stock-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
       }
-      .detail-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+      .stock-form input {
+        width: 88px;
       }
-      .muted {
-        color: var(--muted);
+      a {
+        color: inherit;
+        text-decoration: none;
       }
-      .mini-list {
-        display: grid;
-        gap: 10px;
-      }
-      .mini-item {
-        padding: 12px 14px;
-        border-radius: 14px;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.64);
-      }
-      .brand-footer {
-        margin-top: 8px;
-        padding: 14px;
-        border-radius: 18px;
-        border: 1px solid rgba(226, 198, 122, 0.12);
-        background: rgba(255, 255, 255, 0.04);
-      }
-      .brand-footer img {
-        width: 100%;
-        max-width: 120px;
-        display: block;
-        margin: 0 auto 10px;
-        object-fit: contain;
-      }
-      .brand-footer p {
-        margin: 0;
-        color: rgba(255, 250, 242, 0.66);
-        font-size: 12px;
-        line-height: 1.5;
-      }
-      @media (max-width: 1100px) {
-        .admin-shell {
+      @media (max-width: 900px) {
+        .grid.two {
           grid-template-columns: 1fr;
         }
-        .sidebar {
-          display: none;
-        }
         .stats,
-        .grid.two,
-        .grid.three,
-        .filter-form,
-        .split,
-        .detail-grid {
+        .filter-form {
           grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    {% set endpoint = request.endpoint or '' %}
-    {% set sidebar_visible = endpoint != 'admin.login' and endpoint != 'admin.login_submit' %}
-    {% set logo_url = url_for('media_file', filename='perfume-treasure-logo.png') %}
-    {% set page_content %}
+    <div class="page">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
-            <div class="flash {{ category }}"{% if not sidebar_visible %} style="margin-bottom: 16px;"{% endif %}>{{ message }}</div>
+            <div class="flash {{ category }}">{{ message }}</div>
           {% endfor %}
         {% endif %}
       {% endwith %}
       {% block content %}{% endblock %}
-    {% endset %}
-    {% if sidebar_visible %}
-      <div class="admin-shell">
-        <aside class="sidebar">
-          <div class="brand">
-            <div class="brand-lockup">
-              <img class="brand-logo" src="{{ logo_url }}" alt="Perfume Treasure logo" />
-              <div>
-                <div class="brand-kicker">Perfume Treasure</div>
-                <div class="brand-title">Commerce Admin</div>
-              </div>
-            </div>
-            <div class="brand-note">Luxury fragrance operations with the same black, gold, and ivory identity as the app.</div>
-          </div>
-
-          <div class="nav-group">
-            <div class="nav-label">Overview</div>
-            <a class="nav-link {{ 'active' if endpoint == 'admin.dashboard' else '' }}" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
-            <a class="nav-link {{ 'active' if endpoint == 'admin.analytics' else '' }}" href="{{ url_for('admin.analytics') }}">Analytics</a>
-          </div>
-
-          <div class="nav-group">
-            <div class="nav-label">Catalog</div>
-            <a class="nav-link {{ 'active' if endpoint in ['admin.dashboard', 'admin.new_product', 'admin.edit_product'] else '' }}" href="{{ url_for('admin.dashboard') }}">Products</a>
-            <a class="nav-link {{ 'active' if endpoint == 'admin.collections' else '' }}" href="{{ url_for('admin.collections') }}">Collections</a>
-          </div>
-
-          <div class="nav-group">
-            <div class="nav-label">Sales</div>
-            <a class="nav-link {{ 'active' if endpoint in ['admin.orders', 'admin.order_detail'] else '' }}" href="{{ url_for('admin.orders') }}">Orders</a>
-            <a class="nav-link {{ 'active' if endpoint == 'admin.discounts' else '' }}" href="{{ url_for('admin.discounts') }}">Discounts</a>
-          </div>
-
-          <div class="nav-group">
-            <div class="nav-label">Customers</div>
-            <a class="nav-link {{ 'active' if endpoint in ['admin.customers', 'admin.customer_detail'] else '' }}" href="{{ url_for('admin.customers') }}">Customers</a>
-          </div>
-
-          <div class="nav-group">
-            <div class="nav-label">Configuration</div>
-            <a class="nav-link {{ 'active' if endpoint == 'admin.settings' else '' }}" href="{{ url_for('admin.settings') }}">Settings</a>
-          </div>
-
-          <form method="post" action="{{ url_for('admin.logout') }}">
-            <button type="submit" class="button secondary">Logout</button>
-          </form>
-
-          <div class="brand-footer">
-            <img src="{{ logo_url }}" alt="Perfume Treasure emblem" />
-            <p>Curate products, customers, and orders inside the same brand experience your shoppers see.</p>
-          </div>
-        </aside>
-
-        <main class="main">
-          <div class="topbar">
-            <div class="topbar-brand">
-              <img class="topbar-logo" src="{{ logo_url }}" alt="Perfume Treasure logo" />
-              <div class="topbar-title">
-                <h1>{{ title or 'Admin' }}</h1>
-                <p>{{ subtitle or 'Operate your storefront from one place.' }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="page-content">
-            {{ page_content }}
-          </div>
-        </main>
-      </div>
-    {% else %}
-      <div class="main" style="max-width: 720px; margin: 0 auto;">
-        {{ page_content }}
-      </div>
-    {% endif %}
+    </div>
   </body>
 </html>

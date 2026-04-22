@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,52 +9,23 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
 
 import {fetchProducts} from '../services/api';
 import {palette} from '../theme';
 
 const sortOptions = [
-  {label: 'Featured', value: 'featured'},
-  {label: 'Most relevant', value: 'relevance'},
-  {label: 'Best selling', value: 'best_selling'},
-  {label: 'Alphabetically, A-Z', value: 'name_asc'},
-  {label: 'Alphabetically, Z-A', value: 'name_desc'},
-  {label: 'Price, low to high', value: 'price_asc'},
-  {label: 'Price, high to low', value: 'price_desc'},
-  {label: 'Date, old to new', value: 'date_asc'},
-  {label: 'Date, new to old', value: 'date_desc'},
+  {label: 'Price Low-High', value: 'price_asc'},
+  {label: 'Price High-Low', value: 'price_desc'},
+  {label: 'Name A-Z', value: 'name_asc'},
 ];
 
-function ProductImage({source, style}) {
-  const [hasError, setHasError] = useState(false);
-
-  if (hasError) {
-    return (
-      <View style={[style, styles.imagePlaceholder]}>
-        <Text style={styles.imagePlaceholderText}>No image</Text>
-      </View>
-    );
-  }
-
-  return (
-    <Image
-      source={source}
-      style={style}
-      onError={() => setHasError(true)}
-    />
-  );
-}
-
-function ProductListScreen({navigation, route, onToggleFavorite, isFavorited}) {
+function ProductListScreen({navigation, route}) {
   const selectedCategory = route.params?.category || 'Shop All';
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('best_selling');
+  const [sortBy, setSortBy] = useState('price_asc');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-  const [sortVisible, setSortVisible] = useState(false);
-  const [priceRange, setPriceRange] = useState({min: 0, max: 250});
 
   useEffect(() => {
     let isMounted = true;
@@ -68,8 +38,6 @@ function ProductListScreen({navigation, route, onToggleFavorite, isFavorited}) {
           category: selectedCategory,
           search: searchQuery,
           sort: sortBy,
-          minPrice: priceRange.min,
-          maxPrice: priceRange.max,
         });
 
         if (isMounted) {
@@ -92,14 +60,11 @@ function ProductListScreen({navigation, route, onToggleFavorite, isFavorited}) {
     return () => {
       isMounted = false;
     };
-  }, [priceRange.max, priceRange.min, searchQuery, selectedCategory, sortBy]);
+  }, [searchQuery, selectedCategory, sortBy]);
 
   const filteredProducts = useMemo(() => {
     return products;
   }, [products]);
-
-  const selectedSortLabel =
-    sortOptions.find(option => option.value === sortBy)?.label || 'Best selling';
 
   return (
     <View style={styles.container}>
@@ -129,57 +94,29 @@ function ProductListScreen({navigation, route, onToggleFavorite, isFavorited}) {
             value={searchQuery}
           />
 
-          <View style={styles.controlHeader}>
-            <Text style={styles.sortLabel}>Sort</Text>
-            <Pressable
-              onPress={() => setSortVisible(true)}
-              style={({pressed}) => [
-                styles.sortTrigger,
-                pressed ? styles.sortTriggerPressed : null,
-              ]}>
-              <Text style={styles.sortTriggerText}>{selectedSortLabel}</Text>
-            </Pressable>
-          </View>
+          <Text style={styles.sortLabel}>Sort By</Text>
+          <View style={styles.sortRow}>
+            {sortOptions.map(option => {
+              const isSelected = sortBy === option.value;
 
-          <View style={styles.priceHeader}>
-            <Text style={styles.sortLabel}>Price Range</Text>
-            <Text style={styles.priceSummary}>
-              ${priceRange.min} - ${priceRange.max}
-            </Text>
-          </View>
-          <View style={styles.sliderBlock}>
-            <Text style={styles.sliderCaption}>Minimum</Text>
-            <Slider
-              minimumValue={0}
-              maximumValue={250}
-              step={1}
-              minimumTrackTintColor={palette.gold}
-              maximumTrackTintColor={palette.border}
-              thumbTintColor={palette.gold}
-              value={priceRange.min}
-              onValueChange={value =>
-                setPriceRange(current => ({
-                  ...current,
-                  min: Math.min(value, current.max),
-                }))
-              }
-            />
-            <Text style={styles.sliderCaption}>Maximum</Text>
-            <Slider
-              minimumValue={0}
-              maximumValue={250}
-              step={1}
-              minimumTrackTintColor={palette.gold}
-              maximumTrackTintColor={palette.border}
-              thumbTintColor={palette.gold}
-              value={priceRange.max}
-              onValueChange={value =>
-                setPriceRange(current => ({
-                  ...current,
-                  max: Math.max(value, current.min),
-                }))
-              }
-            />
+              return (
+                <Pressable
+                  key={option.value}
+                  onPress={() => setSortBy(option.value)}
+                  style={[
+                    styles.sortChip,
+                    isSelected ? styles.sortChipActive : null,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.sortChipText,
+                      isSelected ? styles.sortChipTextActive : null,
+                    ]}>
+                    {option.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -214,63 +151,16 @@ function ProductListScreen({navigation, route, onToggleFavorite, isFavorited}) {
                 styles.productCard,
                 pressed ? styles.productCardPressed : null,
               ]}>
-              <ProductImage source={{uri: product.image}} style={styles.productImage} />
+              <Image source={{uri: product.image}} style={styles.productImage} />
               <View style={styles.productInfo}>
-                <View style={styles.productInfoRow}>
-                  <View style={styles.productTextWrap}>
-                    <Text style={styles.productCategory}>{product.category}</Text>
-                    <Text style={styles.productName}>{product.name}</Text>
-                    <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
-                  </View>
-                  <Pressable
-                    onPress={event => {
-                      event.stopPropagation?.();
-                      onToggleFavorite?.(product);
-                    }}
-                    style={styles.heartButton}
-                    hitSlop={8}>
-                    <Text style={styles.heartIcon}>
-                      {isFavorited?.(product.id) ? '❤️' : '🤍'}
-                    </Text>
-                  </Pressable>
-                </View>
+                <Text style={styles.productCategory}>{product.category}</Text>
+                <Text style={styles.productName}>{product.name}</Text>
+                <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
               </View>
             </Pressable>
           ))
         )}
       </ScrollView>
-
-      <Modal
-        visible={sortVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSortVisible(false)}>
-        <Pressable
-          style={styles.sortOverlay}
-          onPress={() => setSortVisible(false)}>
-          <View style={styles.sortSheet}>
-            <Text style={styles.sortSheetTitle}>Sort</Text>
-            {sortOptions.map(option => {
-              const isSelected = sortBy === option.value;
-
-              return (
-                <Pressable
-                  key={option.label}
-                  onPress={() => {
-                    setSortBy(option.value);
-                    setSortVisible(false);
-                  }}
-                  style={styles.sortSheetItem}>
-                  <Text style={styles.sortSheetCheck}>
-                    {isSelected ? '✓' : ' '}
-                  </Text>
-                  <Text style={styles.sortSheetText}>{option.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
@@ -347,81 +237,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1,
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  controlHeader: {
+  sortRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    flexWrap: 'wrap',
   },
-  sortTrigger: {
-    flexShrink: 1,
+  sortChip: {
+    backgroundColor: palette.ivory,
     borderWidth: 1,
     borderColor: palette.border,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    marginRight: 8,
+    marginBottom: 8,
   },
-  sortTriggerPressed: {
-    opacity: 0.9,
+  sortChipActive: {
+    backgroundColor: palette.gold,
+    borderColor: palette.gold,
   },
-  sortTriggerText: {
+  sortChipText: {
     color: '#6c5f47',
     fontSize: 12,
     fontWeight: '700',
   },
-  priceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  priceSummary: {
-    color: palette.charcoal,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  sliderBlock: {
-    paddingTop: 4,
-  },
-  sliderCaption: {
-    color: '#8b7d63',
-    fontSize: 12,
-  },
-  sortOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(18, 18, 18, 0.45)',
-    justifyContent: 'center',
-    padding: 18,
-  },
-  sortSheet: {
-    backgroundColor: '#5f5f5f',
-    borderRadius: 24,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  sortSheetTitle: {
+  sortChipTextActive: {
     color: palette.white,
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  sortSheetItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  sortSheetCheck: {
-    width: 22,
-    color: palette.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  sortSheetText: {
-    color: palette.white,
-    fontSize: 17,
   },
   resultsTitle: {
     color: palette.charcoal,
@@ -484,29 +326,6 @@ const styles = StyleSheet.create({
   productInfo: {
     padding: 16,
   },
-  productInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  productTextWrap: {
-    flex: 1,
-    marginRight: 10,
-  },
-  heartButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: palette.ivory,
-    borderWidth: 1,
-    borderColor: palette.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-  },
-  heartIcon: {
-    fontSize: 20,
-  },
   productCategory: {
     color: '#8e7a53',
     fontSize: 12,
@@ -524,16 +343,6 @@ const styles = StyleSheet.create({
     color: palette.gold,
     fontSize: 20,
     fontWeight: '700',
-  },
-  imagePlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  imagePlaceholderText: {
-    color: '#999',
-    fontSize: 14,
-    fontWeight: '500',
   },
 });
 

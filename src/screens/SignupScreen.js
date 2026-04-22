@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -12,17 +11,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {signup} from '../services/api';
 import {logoImage, palette} from '../theme';
 
-function SignupScreen({navigation, onAuthenticated}) {
+function SignupScreen({navigation, onSignup}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleSignup = async () => {
+  const handleSignup = () => {
     if (
       !name.trim() ||
       !email.trim() ||
@@ -38,31 +35,18 @@ function SignupScreen({navigation, onAuthenticated}) {
       return;
     }
 
-    setLoading(true);
+    onSignup({
+      name: name.trim(),
+      email: email.trim(),
+      password,
+    });
 
-    try {
-      const authData = await signup({
-        fullName: name.trim(),
-        email: email.trim().toLowerCase(),
-        password,
-      });
-
-      onAuthenticated(authData);
-      setLoading(false);
-      Alert.alert('Signup Successful', 'Your account has been created.', [
-        {
-          text: 'Continue',
-          onPress: () =>
-            navigation.replace('Home', {
-              name: authData.user.profile?.full_name || name.trim(),
-              email: authData.user.email,
-            }),
-        },
-      ]);
-    } catch (error) {
-      setLoading(false);
-      Alert.alert('Signup Failed', error.message || 'Unable to create your account.');
-    }
+    Alert.alert('Signup Successful', 'Your account has been created.', [
+      {
+        text: 'OK',
+        onPress: () => navigation.navigate('Login'),
+      },
+    ]);
   };
 
   return (
@@ -129,17 +113,8 @@ function SignupScreen({navigation, onAuthenticated}) {
 
           <Pressable
             onPress={handleSignup}
-            style={({pressed}) => [
-              styles.button,
-              pressed && !loading ? styles.buttonPressed : null,
-              loading ? styles.buttonDisabled : null,
-            ]}
-            disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color={palette.white} />
-            ) : (
-              <Text style={styles.buttonText}>Create Account</Text>
-            )}
+            style={({pressed}) => [styles.button, pressed ? styles.buttonPressed : null]}>
+            <Text style={styles.buttonText}>Create Account</Text>
           </Pressable>
 
           <Pressable onPress={() => navigation.navigate('Login')}>
@@ -237,9 +212,6 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.92,
-  },
-  buttonDisabled: {
-    opacity: 0.75,
   },
   buttonText: {
     color: palette.white,

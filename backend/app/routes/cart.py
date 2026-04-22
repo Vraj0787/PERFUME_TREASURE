@@ -16,11 +16,7 @@ cart_bp = Blueprint("cart", __name__)
 @jwt_required()
 def get_cart():
     user = get_current_user()
-    cart_items, totals = get_cart_snapshot(
-        user,
-        address_id=request.args.get("address_id"),
-        discount_code=request.args.get("discount_code"),
-    )
+    cart_items, totals = get_cart_snapshot(user)
 
     return success_response(
         {
@@ -74,8 +70,10 @@ def update_cart_item(item_id):
     if not cart_item:
         return error_response("Cart item not found", 404)
 
-    if quantity < 1:
-        return error_response("quantity must be at least 1")
+    if quantity <= 0:
+        db.session.delete(cart_item)
+        db.session.commit()
+        return success_response(message="Cart item removed")
 
     if cart_item.product.stock_quantity < quantity:
         return error_response("Requested quantity exceeds available stock", 400)

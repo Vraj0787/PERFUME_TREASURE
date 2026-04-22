@@ -13,10 +13,10 @@ import {
 } from 'react-native';
 import {logoImage, palette} from '../theme';
 
-function ForgotPasswordScreen({navigation}) {
+function ForgotPasswordScreen({navigation, registeredUser}) {
   const [email, setEmail] = useState('');
 
-  const handleSendResetLink = async () => {
+  const handleSendResetLink = () => {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail) {
@@ -24,15 +24,25 @@ function ForgotPasswordScreen({navigation}) {
       return;
     }
 
+    if (!registeredUser) {
+      Alert.alert('No Account Found', 'Please create an account before resetting a password.');
+      return;
+    }
+
+    if (registeredUser.email.toLowerCase() !== normalizedEmail) {
+      Alert.alert('Email Not Found', 'We could not find an account with that email.');
+      return;
+    }
+
     Alert.alert(
-      'Continue Reset',
-      'Continue to choose a new password for this account.',
+      'Reset Email Sent',
+      'A password reset link has been sent to your email.',
       [
         {
-          text: 'Continue',
+          text: 'Open Reset Link',
           onPress: () =>
             navigation.navigate('ResetPassword', {
-              email: normalizedEmail,
+              email: registeredUser.email,
             }),
         },
       ],
@@ -58,7 +68,7 @@ function ForgotPasswordScreen({navigation}) {
 
           <Text style={styles.heroTitle}>Forgot Password</Text>
           <Text style={styles.heroSubtitle}>
-            Enter your email to continue resetting your password
+            Enter your email to receive a password reset link
           </Text>
         </View>
 
