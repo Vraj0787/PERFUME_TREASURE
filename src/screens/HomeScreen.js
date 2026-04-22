@@ -275,6 +275,14 @@ function HomeScreen({navigation, route, cartCount}) {
               style={styles.menuItem}>
               <Text style={styles.menuItemText}>Review</Text>
             </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('AccountDescription');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Account Description</Text>
+            </Pressable>
           </View>
         </Pressable>
       </Modal>

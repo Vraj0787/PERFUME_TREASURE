@@ -14,6 +14,7 @@ import ProductListScreen from './src/screens/ProductListScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
 import SignupScreen from './src/screens/SignupScreen';
+import AccountDescriptionScreen from './src/screens/AccountDescriptionScreen';
 import {palette} from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -121,6 +122,7 @@ function App() {
           <Stack.Screen name="FAQ" component={FAQScreen} />
           <Stack.Screen name="LoyaltyPoints" component={LoyaltyPointsScreen} />
           <Stack.Screen name="Review" component={ReviewScreen} />
+          <Stack.Screen name="AccountDescription" component={AccountDescriptionScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
