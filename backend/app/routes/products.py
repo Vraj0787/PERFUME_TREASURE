@@ -11,24 +11,20 @@ products_bp = Blueprint("products", __name__)
 @products_bp.route('/products/best-sellers', methods=['GET'])
 def get_best_sellers():
     try:
-        # get all products (adjust to your DB setup)
-        products = Product.query.order_by(Product.sales.desc()).limit(5).all()
+        products = Product.query.filter_by(is_best_seller=True).limit(5).all()
 
-        result = []
-        for p in products:
-            result.append({
-                "id": p.id,
-                "name": p.name,
-                "price": p.price,
-                "image": p.image,
-                "description": p.description,
-                "category": p.category
-            })
-
-        return jsonify(result)
+        return jsonify([{
+            "id": p.id,
+            "name": p.name,
+            "price": p.price,
+            "image": p.image,
+            "description": p.description,
+            "category": p.category
+        } for p in products])
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @products_bp.get("")
 def list_products():
