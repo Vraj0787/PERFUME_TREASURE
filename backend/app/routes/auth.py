@@ -111,6 +111,12 @@ def reset_password():
     if not email or not password:
         return error_response("email and password are required")
 
+    if not is_strong_password(password):
+        return error_response(
+            "Password must be at least 8 characters and include at least one letter and one number",
+            400,
+        )
+
     user = User.query.filter_by(email=email).first()
     if not user:
         return error_response("No account found with that email", 404)
