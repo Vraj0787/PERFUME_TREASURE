@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { palette } from '../theme';
 
 function AccountDescriptionScreen({ route }) {
   const user = route.params?.user;
@@ -33,6 +34,12 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
+  },
+  backText: {
+    color: palette.gold,
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 16,
   },
 });
 
