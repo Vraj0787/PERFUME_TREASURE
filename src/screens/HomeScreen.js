@@ -284,6 +284,14 @@ function HomeScreen({
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
+                navigation.navigate('AccountDescription');
+              }}
+              style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Account Description</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                setMenuVisible(false);
                 navigation.navigate('Review');
               }}
               style={styles.menuItem}>

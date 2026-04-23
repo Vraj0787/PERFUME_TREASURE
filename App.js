@@ -14,6 +14,7 @@ import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import LoyaltyPointsScreen from './src/screens/LoyaltyPointsScreen';
 import OrderConfirmationScreen from './src/screens/OrderConfirmationScreen';
+import AccountDescriptionScreen from './src/screens/AccountDescriptionScreen';
 import OrderHistoryScreen from './src/screens/OrderHistoryScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
@@ -299,6 +300,7 @@ function App() {
             )}
           </Stack.Screen>
           <Stack.Screen name="Review" component={ReviewScreen} />
+          <Stack.Screen name="AccountDescription" component={AccountDescriptionScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
