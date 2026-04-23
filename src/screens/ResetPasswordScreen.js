@@ -15,6 +15,16 @@ import {
 import {resetPassword} from '../services/api';
 import {logoImage, palette} from '../theme';
 
+function isStrongPassword(value) {
+  if (value.length < 8) {
+    return false;
+  }
+
+  const hasLetter = /[A-Za-z]/.test(value);
+  const hasNumber = /\d/.test(value);
+  return hasLetter && hasNumber;
+}
+
 function ResetPasswordScreen({navigation, onResetPassword, route}) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,6 +34,14 @@ function ResetPasswordScreen({navigation, onResetPassword, route}) {
   const handleResetPassword = async () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
       Alert.alert('Missing Fields', 'Please enter and confirm your new password.');
+      return;
+    }
+
+    if (!isStrongPassword(newPassword)) {
+      Alert.alert(
+        'Weak Password',
+        'Password must be at least 8 characters and include at least one letter and one number.',
+      );
       return;
     }
 
@@ -95,6 +113,9 @@ function ResetPasswordScreen({navigation, onResetPassword, route}) {
             style={styles.input}
             value={newPassword}
           />
+          <Text style={styles.helperText}>
+            Use at least 8 characters with at least 1 letter and 1 number.
+          </Text>
 
           <Text style={styles.label}>CONFIRM PASSWORD</Text>
           <TextInput
@@ -205,6 +226,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: palette.black,
     backgroundColor: palette.white,
+  },
+  helperText: {
+    marginTop: 8,
+    color: '#8a7a59',
+    fontSize: 12,
+    lineHeight: 18,
   },
   button: {
     height: 54,
