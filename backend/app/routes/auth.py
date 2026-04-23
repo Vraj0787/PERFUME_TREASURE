@@ -1,3 +1,5 @@
+import re
+
 from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, jwt_required
 
@@ -9,6 +11,20 @@ from ..utils.auth import get_current_user
 from ..utils.responses import error_response, success_response
 
 auth_bp = Blueprint("auth", __name__)
+
+EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+
+
+def is_valid_email(email):
+    return bool(EMAIL_PATTERN.match(email))
+
+
+def is_strong_password(password):
+    if len(password) < 8:
+        return False
+    has_letter = any(char.isalpha() for char in password)
+    has_number = any(char.isdigit() for char in password)
+    return has_letter and has_number
 
 
 @auth_bp.post("/signup")
@@ -22,6 +38,15 @@ def signup():
 
     if not full_name or not email or not password:
         return error_response("full_name, email, and password are required")
+
+    if not is_valid_email(email):
+        return error_response("Please provide a valid email address", 400)
+
+    if not is_strong_password(password):
+        return error_response(
+            "Password must be at least 8 characters and include at least one letter and one number",
+            400,
+        )
 
     if User.query.filter_by(email=email).first():
         return error_response("A user with this email already exists", 409)

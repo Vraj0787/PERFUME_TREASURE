@@ -15,6 +15,18 @@ import {
 import {signup} from '../services/api';
 import {logoImage, palette} from '../theme';
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isStrongPassword(value) {
+  if (value.length < 8) {
+    return false;
+  }
+
+  const hasLetter = /[A-Za-z]/.test(value);
+  const hasNumber = /\d/.test(value);
+  return hasLetter && hasNumber;
+}
+
 function SignupScreen({navigation, onAuthenticated}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,13 +35,28 @@ function SignupScreen({navigation, onAuthenticated}) {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+
     if (
       !name.trim() ||
-      !email.trim() ||
+      !normalizedEmail ||
       !password.trim() ||
       !confirmPassword.trim()
     ) {
       Alert.alert('Missing Fields', 'Please complete all fields before signing up.');
+      return;
+    }
+
+    if (!emailPattern.test(normalizedEmail)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      Alert.alert(
+        'Weak Password',
+        'Password must be at least 8 characters and include at least one letter and one number.',
+      );
       return;
     }
 
@@ -43,7 +70,7 @@ function SignupScreen({navigation, onAuthenticated}) {
     try {
       const authData = await signup({
         fullName: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         password,
       });
 
@@ -116,6 +143,9 @@ function SignupScreen({navigation, onAuthenticated}) {
             style={styles.input}
             value={password}
           />
+          <Text style={styles.helperText}>
+            Use at least 8 characters with at least 1 letter and 1 number.
+          </Text>
 
           <Text style={styles.label}>CONFIRM PASSWORD</Text>
           <TextInput
@@ -225,6 +255,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: palette.black,
     backgroundColor: palette.white,
+  },
+  helperText: {
+    marginTop: 8,
+    color: '#8a7a59',
+    fontSize: 12,
+    lineHeight: 18,
   },
   button: {
     height: 54,
