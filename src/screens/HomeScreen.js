@@ -284,7 +284,12 @@ function HomeScreen({
             <Pressable
               onPress={() => {
                 setMenuVisible(false);
-                navigation.navigate('AccountDescription');
+                navigation.navigate('AccountDescription', {
+                user: {
+                  name: route.params?.name,
+                  email: route.params?.email,
+                }
+              });
               }}
               style={styles.menuItem}>
               <Text style={styles.menuItemText}>Account Description</Text>

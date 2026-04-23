@@ -1,16 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-function AccountDescriptionScreen() {
+function AccountDescriptionScreen({ route }) {
+  const user = route.params?.user;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Account Description</Text>
+
       <Text style={styles.text}>
-        This section provides information about your account, preferences, and activity.
+        Name: {user?.name || 'N/A'}
+      </Text>
+
+      <Text style={styles.text}>
+        Email: {user?.email || 'N/A'}
       </Text>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
