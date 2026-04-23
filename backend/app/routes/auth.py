@@ -75,3 +75,22 @@ def me():
     if not user:
         return error_response("User not found", 404)
     return success_response(serialize_user(user))
+
+
+@auth_bp.post("/reset-password")
+def reset_password():
+    payload = request.get_json() or {}
+    email = (payload.get("email") or "").strip().lower()
+    password = payload.get("password") or ""
+
+    if not email or not password:
+        return error_response("email and password are required")
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return error_response("No account found with that email", 404)
+
+    user.set_password(password)
+    db.session.commit()
+
+    return success_response(serialize_user(user), "Password updated successfully")

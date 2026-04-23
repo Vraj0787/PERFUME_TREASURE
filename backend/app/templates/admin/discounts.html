@@ -1,0 +1,104 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+  <div class="hero-card">
+    <div class="eyebrow">Sales</div>
+    <h1>Discounts</h1>
+    <p>Create promo codes with percentage or fixed discounts, date windows, and cart minimums.</p>
+  </div>
+
+  <div class="split">
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Create Discount</h2>
+          <p>Launch a new campaign code.</p>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('admin.create_discount') }}">
+        <div class="grid two">
+          <div class="field">
+            <label>Code</label>
+            <input name="code" type="text" required />
+          </div>
+          <div class="field">
+            <label>Discount Type</label>
+            <select name="discount_type">
+              <option value="percentage">Percentage</option>
+              <option value="fixed">Fixed amount</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid two">
+          <div class="field">
+            <label>Value</label>
+            <input name="value" type="number" step="0.01" required />
+          </div>
+          <div class="field">
+            <label>Minimum Order Amount</label>
+            <input name="minimum_order_amount" type="number" step="0.01" />
+          </div>
+        </div>
+        <div class="grid three">
+          <div class="field">
+            <label>Usage Limit</label>
+            <input name="usage_limit" type="number" min="1" />
+          </div>
+          <div class="field">
+            <label>Starts At</label>
+            <input name="starts_at" type="datetime-local" />
+          </div>
+          <div class="field">
+            <label>Ends At</label>
+            <input name="ends_at" type="datetime-local" />
+          </div>
+        </div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; margin:0; letter-spacing:0; text-transform:none;">
+            <input type="checkbox" name="is_active" checked />
+            Active
+          </label>
+        </div>
+        <button type="submit">Create Discount</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Discount Codes</h2>
+          <p>Current offers and promotional rules.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for discount in discounts %}
+            <tr>
+              <td>{{ discount.code }}</td>
+              <td>{{ discount.discount_type }}</td>
+              <td>{{ discount.value }}</td>
+              <td><span class="badge {{ 'green' if discount.is_active else 'red' }}">{{ 'Active' if discount.is_active else 'Inactive' }}</span></td>
+              <td class="actions">
+                <form method="post" class="inline-form" action="{{ url_for('admin.toggle_discount', discount_id=discount.id) }}">
+                  <button type="submit" class="button secondary">{{ 'Disable' if discount.is_active else 'Enable' }}</button>
+                </form>
+                <form method="post" class="inline-form" action="{{ url_for('admin.delete_discount', discount_id=discount.id) }}" onsubmit="return confirm('Delete this discount?');">
+                  <button type="submit" class="button secondary">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

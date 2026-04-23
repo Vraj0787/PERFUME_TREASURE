@@ -16,6 +16,7 @@ def serialize_profile(profile):
         "id": profile.id,
         "full_name": profile.full_name,
         "phone": profile.phone,
+        "notes": profile.notes,
     }
 
 
@@ -24,6 +25,7 @@ def serialize_user(user):
         "id": user.id,
         "email": user.email,
         "is_active": user.is_active,
+        "loyalty_points_balance": user.loyalty_points_balance,
         "profile": serialize_profile(user.profile) if user.profile else None,
     }
 
@@ -39,17 +41,47 @@ def serialize_category(category):
 
 def serialize_product(product):
     primary_image = sorted(product.images, key=lambda image: image.sort_order)[0] if product.images else None
+    review_count = len(product.reviews)
+    average_rating = (
+        round(sum(review.rating for review in product.reviews) / review_count, 1)
+        if review_count
+        else None
+    )
     return {
         "id": product.id,
         "name": product.name,
         "slug": product.slug,
+        "subtitle": product.subtitle,
         "description": product.description,
+        "how_to_apply": product.how_to_apply,
+        "size_label": product.size_label,
         "price": float(product.price),
         "compare_at_price": float(product.compare_at_price) if product.compare_at_price is not None else None,
         "is_active": product.is_active,
         "is_featured": product.is_featured,
         "stock_quantity": product.stock_quantity,
+        "review_count": review_count,
+        "average_rating": average_rating,
         "category": serialize_category(product.category) if product.category else None,
+        "collection": {
+            "id": product.collection.id,
+            "name": product.collection.name,
+            "slug": product.collection.slug,
+        }
+        if product.collection
+        else None,
+        "variants": [
+            {
+                "id": variant.id,
+                "title": variant.title,
+                "sku": variant.sku,
+                "size_label": variant.size_label,
+                "price": float(variant.price) if variant.price is not None else None,
+                "stock_quantity": variant.stock_quantity,
+                "is_default": variant.is_default,
+            }
+            for variant in product.variants
+        ],
         "images": [
             {
                 "id": image.id,
@@ -60,6 +92,18 @@ def serialize_product(product):
             for image in sorted(product.images, key=lambda image: image.sort_order)
         ],
         "image": _absolute_image_url(primary_image.image_url) if primary_image else None,
+    }
+
+
+def serialize_review(review):
+    return {
+        "id": review.id,
+        "rating": review.rating,
+        "title": review.title,
+        "content": review.content,
+        "display_name": review.display_name,
+        "created_at": review.created_at.isoformat(),
+        "product": serialize_product(review.product) if review.product else None,
     }
 
 
@@ -93,11 +137,15 @@ def serialize_order(order):
         "status": order.status,
         "payment_status": order.payment_status,
         "subtotal": float(order.subtotal),
+        "discount_amount": float(order.discount_amount),
+        "discount_code": order.discount_code,
         "shipping_amount": float(order.shipping_amount),
         "tax_amount": float(order.tax_amount),
         "total_amount": float(order.total_amount),
+        "points_earned": order.points_earned,
         "payment_method": order.payment_method,
         "transaction_reference": order.transaction_reference,
+        "notes": order.notes,
         "created_at": order.created_at.isoformat(),
         "address": serialize_address(order.address) if order.address else None,
         "items": [
