@@ -16,7 +16,11 @@ cart_bp = Blueprint("cart", __name__)
 @jwt_required()
 def get_cart():
     user = get_current_user()
-    cart_items, totals = get_cart_snapshot(user)
+    cart_items, totals = get_cart_snapshot(
+        user,
+        address_id=request.args.get("address_id"),
+        discount_code=request.args.get("discount_code"),
+    )
 
     return success_response(
         {
@@ -86,16 +90,24 @@ def update_cart_item(item_id):
 def delete_cart_item(item_id):
     user = get_current_user()
     cart_item = CartItem.query.filter_by(id=item_id, user_id=user.id).first()
-    if not cart_item:
+     if not cart_item:
         return error_response("Cart item not found", 404)
 
-    db.session.delete(cart_item)
-    db.session.commit()
-    return success_response(message="Cart item removed")
+    if quantity < 1:
+        return error_response("quantity must be at least 1")
+    if quantity <= 0:
+        db.session.delete(cart_item)
+        db.session.commit()
+        return success_response(message="Cart item removed")
 
+    if cart_item.product.stock_quantity < quantity:
+        return error_response("Requested quantity exceeds available stock", 400)
+@@ -81,6 +83,7 @@ def update_cart_item(item_id):
+    return success_response(serialize_cart_item(cart_item), "Cart item updated")
 
-@cart_bp.delete("")
+@cart_bp.delete("/items/<item_id>")
 @jwt_required()
+def delete_cart_item(item_id):
 def clear_cart():
     user = get_current_user()
     CartItem.query.filter_by(user_id=user.id).delete()
