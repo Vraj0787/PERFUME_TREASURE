@@ -285,14 +285,14 @@ function HomeScreen({
               onPress={() => {
                 setMenuVisible(false);
                 navigation.navigate('AccountDescription', {
-                user: {
-                  name: route.params?.name,
-                  email: route.params?.email,
-                }
-              });
+                  user: {
+                    name: currentUser?.profile?.full_name || route.params?.name,
+                    email: currentUser?.email || route.params?.email,
+                  },
+                });
               }}
               style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Account Description</Text>
+              <Text style={styles.menuItemText}>Account Details</Text>
             </Pressable>
             <Pressable
               onPress={() => {

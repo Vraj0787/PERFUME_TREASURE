@@ -12,11 +12,23 @@ from ..utils.responses import error_response, success_response
 
 auth_bp = Blueprint("auth", __name__)
 
-EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+EMAIL_PATTERN = re.compile(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", re.IGNORECASE)
+PHONE_PATTERN = re.compile(r"^[0-9+\-() ]{7,20}$")
 
 
 def is_valid_email(email):
-    return bool(EMAIL_PATTERN.match(email))
+    if not EMAIL_PATTERN.match(email):
+        return False
+    if ".." in email:
+        return False
+    local_part, _, domain = email.partition("@")
+    if not local_part or not domain:
+        return False
+    if local_part.startswith(".") or local_part.endswith("."):
+        return False
+    if domain.startswith((".", "-")) or domain.endswith((".", "-")):
+        return False
+    return True
 
 
 def is_strong_password(password):
@@ -25,6 +37,17 @@ def is_strong_password(password):
     has_letter = any(char.isalpha() for char in password)
     has_number = any(char.isdigit() for char in password)
     return has_letter and has_number
+
+
+def is_valid_full_name(full_name):
+    cleaned_name = (full_name or "").strip()
+    return len(cleaned_name) >= 2
+
+
+def is_valid_phone(phone):
+    if phone in (None, ""):
+        return True
+    return bool(PHONE_PATTERN.match(phone.strip()))
 
 
 @auth_bp.post("/signup")
@@ -39,6 +62,9 @@ def signup():
     if not full_name or not email or not password:
         return error_response("full_name, email, and password are required")
 
+    if not is_valid_full_name(full_name):
+        return error_response("Please provide a valid full name", 400)
+
     if not is_valid_email(email):
         return error_response("Please provide a valid email address", 400)
 
@@ -47,6 +73,9 @@ def signup():
             "Password must be at least 8 characters and include at least one letter and one number",
             400,
         )
+
+    if not is_valid_phone(phone):
+        return error_response("Please provide a valid phone number", 400)
 
     if User.query.filter_by(email=email).first():
         return error_response("A user with this email already exists", 409)
@@ -100,6 +129,46 @@ def me():
     if not user:
         return error_response("User not found", 404)
     return success_response(serialize_user(user))
+
+
+@auth_bp.patch("/me")
+@jwt_required()
+def update_me():
+    user = get_current_user()
+    if not user:
+        return error_response("User not found", 404)
+
+    payload = request.get_json() or {}
+    full_name = (payload.get("full_name") or "").strip()
+    email = (payload.get("email") or "").strip().lower()
+    phone = (payload.get("phone") or "").strip() or None
+
+    if not full_name or not email:
+        return error_response("full_name and email are required", 400)
+
+    if not is_valid_full_name(full_name):
+        return error_response("Please provide a valid full name", 400)
+
+    if not is_valid_email(email):
+        return error_response("Please provide a valid email address", 400)
+
+    if not is_valid_phone(phone):
+        return error_response("Please provide a valid phone number", 400)
+
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user and existing_user.id != user.id:
+        return error_response("A user with this email already exists", 409)
+
+    if not user.profile:
+        user.profile = Profile(full_name=full_name, phone=phone)
+    else:
+        user.profile.full_name = full_name
+        user.profile.phone = phone
+
+    user.email = email
+    db.session.commit()
+
+    return success_response(serialize_user(user), "Account details updated successfully")
 
 
 @auth_bp.post("/reset-password")

@@ -3,6 +3,12 @@ import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 import {palette} from '../theme';
 
+function formatStatusLabel(value) {
+  return (value || 'pending')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, character => character.toUpperCase());
+}
+
 function OrderConfirmationScreen({navigation, route}) {
   const order = route.params?.order;
 
@@ -13,11 +19,18 @@ function OrderConfirmationScreen({navigation, route}) {
         <Text style={styles.subtitle}>
           Thank you for shopping with Perfume Treasure.
         </Text>
+        <Text style={styles.helperText}>
+          Your order has been received and payment will be confirmed in the next fulfillment step.
+        </Text>
 
         <View style={styles.summary}>
           <Text style={styles.summaryLine}>Order ID: #{order?.id || '-'}</Text>
-          <Text style={styles.summaryLine}>Status: {order?.status || '-'}</Text>
-          <Text style={styles.summaryLine}>Payment: {order?.payment_status || '-'}</Text>
+          <Text style={styles.summaryLine}>
+            Status: {formatStatusLabel(order?.status)}
+          </Text>
+          <Text style={styles.summaryLine}>
+            Payment: {formatStatusLabel(order?.payment_status)}
+          </Text>
           <Text style={styles.summaryLine}>
             Points Earned: {Number(order?.points_earned || 0)}
           </Text>
@@ -71,6 +84,12 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#6f6047',
     fontSize: 14,
+    marginBottom: 8,
+  },
+  helperText: {
+    color: '#6f6047',
+    fontSize: 13,
+    lineHeight: 20,
     marginBottom: 14,
   },
   summary: {

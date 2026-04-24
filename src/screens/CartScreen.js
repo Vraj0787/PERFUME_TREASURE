@@ -17,6 +17,7 @@ import {
   removeCartItem,
   updateCartItem,
 } from '../services/api';
+import ScreenNavActions from '../components/ScreenNavActions';
 import {palette} from '../theme';
 
 function CartScreen({navigation, onCartUpdated}) {
@@ -105,9 +106,7 @@ function CartScreen({navigation, onCartUpdated}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <ScreenNavActions navigation={navigation} color={palette.goldSoft} />
           <Text style={styles.brandText}>PERFUME TREASURE</Text>
           <Text style={styles.title}>Your Cart</Text>
           <Text style={styles.subtitle}>

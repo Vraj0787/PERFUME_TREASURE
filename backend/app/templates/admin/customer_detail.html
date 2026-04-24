@@ -20,8 +20,9 @@
     <div class="card">
       <h2>Addresses</h2>
       {% if customer.addresses %}
+        <div class="stack">
         {% for address in customer.addresses %}
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+          <div class="mini-item">
             <div><strong>{{ address.full_name }}</strong>{% if address.is_default %} <span class="badge gold">Default</span>{% endif %}</div>
             <div>{{ address.line1 }}</div>
             {% if address.line2 %}<div>{{ address.line2 }}</div>{% endif %}
@@ -30,6 +31,7 @@
             {% if address.phone %}<div>{{ address.phone }}</div>{% endif %}
           </div>
         {% endfor %}
+        </div>
       {% else %}
         <p>No saved addresses.</p>
       {% endif %}
@@ -50,6 +52,18 @@
       </div>
       <button type="submit">Save Notes</button>
     </form>
+
+    <div class="subtle-divider">
+      <div class="section-head">
+        <div>
+          <h2>Account Controls</h2>
+          <p>Permanently remove this customer and their related records.</p>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('admin.delete_customer', customer_id=customer.id) }}" onsubmit="return confirm('Delete this customer account and all related records?');">
+        <button type="submit" class="danger">Delete Customer Account</button>
+      </form>
+    </div>
   </div>
 
   <div class="card" style="margin-top: 18px;">

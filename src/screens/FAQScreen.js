@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import ScreenNavActions from '../components/ScreenNavActions';
 import {palette} from '../theme';
 
 const FAQScreen = ({navigation}) => {
@@ -12,7 +13,7 @@ const FAQScreen = ({navigation}) => {
     },
     {
       question: "Do you offer international shipping?",
-      answer: "Currently, we primarily ship within [your country or regions you ship to], but we are working on expanding our services. Please check our shipping policy for updates."
+      answer: "At the moment, Perfume Treasure ships within the United States. We will share updates in the app and on our website when additional regions become available."
     },
     {
       question: "How long does shipping take?",
@@ -20,7 +21,7 @@ const FAQScreen = ({navigation}) => {
     },
     {
       question: "What is your return and refund policy?",
-      answer: "We accept returns on unopened and unused perfumes within [X] days of delivery. If you receive a damaged or incorrect item, please contact us at Info@perfumetreasure.net for assistance."
+      answer: "We accept returns on unopened and unused perfumes within 14 days of delivery. If you receive a damaged or incorrect item, please contact us at Info@perfumetreasure.net for assistance."
     },
     {
       question: "Do you offer discounts or promotions?",
@@ -50,9 +51,7 @@ const FAQScreen = ({navigation}) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Pressable onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>Back</Text>
-      </Pressable>
+      <ScreenNavActions navigation={navigation} color={palette.gold} />
       <Text style={styles.eyebrow}>PERFUME TREASURE</Text>
       <Text style={styles.title}>Frequently Asked Questions</Text>
 

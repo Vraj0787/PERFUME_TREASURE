@@ -16,20 +16,23 @@ products_bp = Blueprint("products", __name__)
 
 @products_bp.get("/best-sellers")
 def get_best_sellers():
-    try:
-        products = Product.query.filter_by(is_best_seller=True).limit(5).all()
-
-        return jsonify([{
-            "id": p.id,
-            "name": p.name,
-            "price": p.price,
-            "image": p.image,
-            "description": p.description,
-            "category": p.category
-        } for p in products])
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    top_products = (
+        db.session.query(
+            Product,
+            func.coalesce(func.sum(OrderItem.quantity), 0).label("units_sold"),
+        )
+        .outerjoin(OrderItem, OrderItem.product_id == Product.id)
+        .filter(Product.is_active.is_(True))
+        .group_by(Product.id)
+        .order_by(
+            func.coalesce(func.sum(OrderItem.quantity), 0).desc(),
+            Product.is_best_seller.desc(),
+            Product.is_featured.desc(),
+            Product.created_at.desc(),
+        )
+        .limit(6)
+        .all()
+    )
 
     return success_response([serialize_product(product) for product, _units_sold in top_products])
 
@@ -77,7 +80,26 @@ def list_products():
     elif sort_by == "relevance":
         query = query.order_by(Product.is_featured.desc(), Product.created_at.desc())
     elif sort_by == "best_selling":
-        query = query.order_by(Product.is_featured.desc(), Product.stock_quantity.asc())
+        units_sold_subquery = (
+            db.session.query(
+                OrderItem.product_id.label("product_id"),
+                func.coalesce(func.sum(OrderItem.quantity), 0).label("units_sold"),
+            )
+            .group_by(OrderItem.product_id)
+            .subquery()
+        )
+        query = (
+            query.outerjoin(
+                units_sold_subquery,
+                Product.id == units_sold_subquery.c.product_id,
+            )
+            .order_by(
+                func.coalesce(units_sold_subquery.c.units_sold, 0).desc(),
+                Product.is_best_seller.desc(),
+                Product.is_featured.desc(),
+                Product.created_at.desc(),
+            )
+        )
     else:
         query = query.order_by(Product.is_featured.desc(), Product.created_at.desc())
 

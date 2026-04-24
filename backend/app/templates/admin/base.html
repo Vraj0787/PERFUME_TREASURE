@@ -235,6 +235,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        min-height: 44px;
         box-shadow: 0 10px 24px rgba(201, 163, 74, 0.2);
       }
       .button.secondary {
@@ -242,6 +243,11 @@
         color: var(--text);
         border: 1px solid var(--line);
         box-shadow: none;
+      }
+      .button.danger, button.danger {
+        background: linear-gradient(180deg, #d77e67 0%, #c9624f 100%);
+        color: white;
+        box-shadow: 0 10px 24px rgba(201, 98, 79, 0.18);
       }
       .button.gold {
         background: var(--gold);
@@ -341,10 +347,27 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-        align-items: center;
+        align-items: stretch;
+      }
+      .actions .button,
+      .actions button {
+        min-width: 118px;
+      }
+      .actions .inline-form {
+        display: inline-flex;
+        margin: 0;
       }
       .inline-form {
         display: inline;
+      }
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+      .subtle-divider {
+        border-top: 1px solid var(--line);
+        margin-top: 18px;
+        padding-top: 18px;
       }
       .badge {
         display: inline-flex;

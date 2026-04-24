@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import ScreenNavActions from '../components/ScreenNavActions';
 import {logoImage, palette} from '../theme';
 
 function ForgotPasswordScreen({navigation}) {
@@ -48,6 +49,7 @@ function ForgotPasswordScreen({navigation}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
+          <ScreenNavActions navigation={navigation} color={palette.goldSoft} />
           <View style={styles.brandRow}>
             <Image source={logoImage} style={styles.logo} resizeMode="contain" />
             <View style={styles.brandTextWrap}>

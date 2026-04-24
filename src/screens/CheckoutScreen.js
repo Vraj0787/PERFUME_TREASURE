@@ -2,6 +2,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,7 @@ import {
   fetchAddresses,
   fetchCheckoutQuote,
 } from '../services/api';
+import ScreenNavActions from '../components/ScreenNavActions';
 import {palette} from '../theme';
 
 const initialForm = {
@@ -30,7 +32,12 @@ const initialForm = {
   phone: '',
 };
 
-function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
+function CheckoutScreen({
+  navigation,
+  onCartUpdated,
+  onLoyaltyEarned,
+  stripeEnabled,
+}) {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [form, setForm] = useState(initialForm);
@@ -109,6 +116,22 @@ function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
     );
   }, [form]);
 
+  const selectedAddress = useMemo(
+    () => addresses.find(address => address.id === selectedAddressId) || null,
+    [addresses, selectedAddressId],
+  );
+
+  const openStripeWebsite = useCallback(async () => {
+    try {
+      await Linking.openURL('https://stripe.com/');
+    } catch (_error) {
+      Alert.alert(
+        'Unable to Open Stripe',
+        'Please visit https://stripe.com/ in your browser.',
+      );
+    }
+  }, []);
+
   const handleCreateAddress = async () => {
     if (!canCreateAddress) {
       Alert.alert('Missing Fields', 'Please complete all required address fields.');
@@ -131,6 +154,28 @@ function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
     }
   };
 
+  const submitOrder = useCallback(
+    async ({paymentMethod = 'manual_review', paymentIntentId} = {}) => {
+      setPlacingOrder(true);
+      try {
+        const order = await createCheckout({
+          addressId: selectedAddressId,
+          discountCode,
+          paymentMethod,
+          paymentIntentId,
+        });
+        onCartUpdated?.({items: []});
+        onLoyaltyEarned?.(order?.points_earned || 0);
+        navigation.replace('OrderConfirmation', {order});
+      } catch (error) {
+        Alert.alert('Checkout Failed', error.message || 'Unable to place order.');
+      } finally {
+        setPlacingOrder(false);
+      }
+    },
+    [discountCode, navigation, onCartUpdated, onLoyaltyEarned, selectedAddressId],
+  );
+
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) {
       Alert.alert(
@@ -140,20 +185,30 @@ function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
       return;
     }
 
-    try {
-      setPlacingOrder(true);
-      const order = await createCheckout({
-        addressId: selectedAddressId,
-        discountCode,
-      });
-      onCartUpdated?.({items: []});
-      onLoyaltyEarned?.(order?.points_earned || 0);
-      navigation.replace('OrderConfirmation', {order});
-    } catch (error) {
-      Alert.alert('Checkout Failed', error.message || 'Unable to place order.');
-    } finally {
-      setPlacingOrder(false);
+    if (!stripeEnabled) {
+      Alert.alert(
+        'Stripe Integration Coming Soon',
+        'Our client is still setting up their Stripe account. You can open Stripe to learn more and still confirm this order now for manual follow-up.',
+        [
+          {text: 'Cancel', style: 'cancel'},
+          {
+            text: 'Open Stripe',
+            onPress: () => {
+              openStripeWebsite();
+            },
+          },
+          {
+            text: 'Confirm Order',
+            onPress: () => {
+              submitOrder({paymentMethod: 'manual_review'});
+            },
+          },
+        ],
+      );
+      return;
     }
+
+    await submitOrder({paymentMethod: 'manual_review'});
   };
 
   return (
@@ -163,9 +218,7 @@ function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <ScreenNavActions navigation={navigation} color={palette.goldSoft} />
           <Text style={styles.brandText}>PERFUME TREASURE</Text>
           <Text style={styles.title}>Checkout</Text>
         </View>
@@ -304,6 +357,29 @@ function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
 
             <Text style={styles.sectionLabel}>Order Summary</Text>
             <View style={styles.formCard}>
+              {!stripeEnabled ? (
+                <View style={styles.noticeCard}>
+                  <Text style={styles.noticeTitle}>Stripe Integration Coming Soon</Text>
+                  <Text style={styles.noticeText}>
+                    Our client is still working on creating their Stripe account. You can
+                    still confirm this order now and we will follow up manually.
+                  </Text>
+                  <Pressable
+                    onPress={openStripeWebsite}
+                    style={({pressed}) => [
+                      styles.noticeButton,
+                      pressed ? styles.buttonPressed : null,
+                    ]}>
+                    <Text style={styles.noticeButtonText}>Open Stripe</Text>
+                  </Pressable>
+                </View>
+              ) : null}
+
+              <Text style={styles.checkoutNote}>
+                {stripeEnabled
+                  ? 'Card payments are processed securely with Stripe. Select an address before opening the payment sheet.'
+                  : 'Orders can still be submitted now while Stripe onboarding is in progress.'}
+              </Text>
               <Text style={styles.summaryRow}>
                 Subtotal: ${Number(totals?.subtotal || 0).toFixed(2)}
               </Text>
@@ -331,11 +407,13 @@ function CheckoutScreen({navigation, onCartUpdated, onLoyaltyEarned}) {
                 styles.primaryButton,
                 pressed ? styles.buttonPressed : null,
               ]}
-              disabled={placingOrder}>
+              disabled={placingOrder || !selectedAddressId || !totals}>
               {placingOrder ? (
                 <ActivityIndicator color={palette.white} />
               ) : (
-                <Text style={styles.primaryButtonText}>Place Order</Text>
+                <Text style={styles.primaryButtonText}>
+                  {stripeEnabled ? 'Pay with Card' : 'Confirm Order'}
+                </Text>
               )}
             </Pressable>
           </View>
@@ -395,6 +473,44 @@ const styles = StyleSheet.create({
   helperText: {
     color: '#7f6f51',
     marginBottom: 16,
+  },
+  checkoutNote: {
+    color: '#7f6f51',
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  noticeCard: {
+    backgroundColor: palette.white,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 14,
+    marginBottom: 12,
+  },
+  noticeTitle: {
+    color: palette.black,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  noticeText: {
+    color: '#675a43',
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  noticeButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: palette.black,
+  },
+  noticeButtonText: {
+    color: palette.white,
+    fontSize: 14,
+    fontWeight: '700',
   },
   addressCard: {
     backgroundColor: palette.white,

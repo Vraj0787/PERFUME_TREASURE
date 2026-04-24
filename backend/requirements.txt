@@ -3,7 +3,9 @@ Flask-Cors==5.0.0
 Flask-JWT-Extended==4.7.1
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
+gunicorn==23.0.0
 marshmallow==3.23.2
 PyMySQL==1.1.1
 python-dotenv==1.0.1
 requests==2.31.0
+stripe==11.6.0

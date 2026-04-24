@@ -1,7 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,8 +8,15 @@ import {
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 
+import ScreenNavActions from '../components/ScreenNavActions';
 import {fetchOrders} from '../services/api';
 import {palette} from '../theme';
+
+function formatStatusLabel(value) {
+  return (value || 'pending')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, character => character.toUpperCase());
+}
 
 function OrderHistoryScreen({navigation}) {
   const [orders, setOrders] = useState([]);
@@ -44,9 +50,7 @@ function OrderHistoryScreen({navigation}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <ScreenNavActions navigation={navigation} color={palette.goldSoft} />
           <Text style={styles.brandText}>PERFUME TREASURE</Text>
           <Text style={styles.title}>Order History</Text>
         </View>
@@ -75,8 +79,12 @@ function OrderHistoryScreen({navigation}) {
                 <Text style={styles.orderMeta}>
                   Placed: {new Date(order.created_at).toLocaleString()}
                 </Text>
-                <Text style={styles.orderMeta}>Status: {order.status}</Text>
-                <Text style={styles.orderMeta}>Payment: {order.payment_status}</Text>
+                <Text style={styles.orderMeta}>
+                  Status: {formatStatusLabel(order.status)}
+                </Text>
+                <Text style={styles.orderMeta}>
+                  Payment: {formatStatusLabel(order.payment_status)}
+                </Text>
                 <Text style={styles.orderMeta}>
                   Points Earned: {Number(order.points_earned || 0)}
                 </Text>

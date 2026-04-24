@@ -248,6 +248,20 @@ def update_customer_notes(customer_id):
     return redirect(url_for("admin.customer_detail", customer_id=customer.id))
 
 
+@admin_bp.post("/customers/<customer_id>/delete")
+@admin_required
+def delete_customer(customer_id):
+    customer = User.query.get_or_404(customer_id)
+
+    for order in list(customer.orders):
+        db.session.delete(order)
+
+    db.session.delete(customer)
+    db.session.commit()
+    flash("Customer account and related records deleted.", "success")
+    return redirect(url_for("admin.customers"))
+
+
 @admin_bp.get("/orders")
 @admin_required
 def orders():

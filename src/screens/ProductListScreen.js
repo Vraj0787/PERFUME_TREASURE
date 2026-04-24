@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 
+import ScreenNavActions from '../components/ScreenNavActions';
 import {fetchProducts} from '../services/api';
 import {palette} from '../theme';
 
@@ -88,9 +89,7 @@ function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <ScreenNavActions navigation={navigation} color={palette.goldSoft} />
           <Text style={styles.headerBrand}>PERFUME TREASURE</Text>
           <Text style={styles.headerTitle}>Browse Collection</Text>
           <View style={styles.categoryBadge}>

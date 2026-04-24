@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import ScreenNavActions from '../components/ScreenNavActions';
 import {fetchProducts} from '../services/api';
 import {palette} from '../theme';
 
@@ -43,8 +44,11 @@ function FavoritesScreen({navigation, onAddToCart, favoritesIds, onToggleFavorit
     try {
       await onAddToCart(product, 1);
       Alert.alert('Added to Cart', `${product.name} added to your cart.`);
-    } catch (error) {
-      Alert.alert('Add to Cart Failed', error.message || 'Unable to add item to cart.');
+    } catch (cartError) {
+      Alert.alert(
+        'Add to Cart Failed',
+        cartError.message || 'Unable to add item to cart.',
+      );
     }
   };
 
@@ -55,9 +59,7 @@ function FavoritesScreen({navigation, onAddToCart, favoritesIds, onToggleFavorit
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+          <ScreenNavActions navigation={navigation} color={palette.goldSoft} />
           <Text style={styles.headerBrand}>PERFUME TREASURE</Text>
           <Text style={styles.headerTitle}>My Favorites</Text>
         </View>
@@ -79,7 +81,7 @@ function FavoritesScreen({navigation, onAddToCart, favoritesIds, onToggleFavorit
               Tap the heart on any product to save it here.
             </Text>
             <Pressable
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate('ProductList', {category: 'Shop All'})}
               style={({pressed}) => [
                 styles.browseButton,
                 pressed ? styles.browseButtonPressed : null,

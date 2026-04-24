@@ -126,11 +126,13 @@ function SignupScreen({navigation, onAuthenticated}) {
           <Text style={styles.label}>EMAIL ADDRESS</Text>
           <TextInput
             autoCapitalize="none"
+            autoCorrect={false}
             keyboardType="email-address"
             onChangeText={setEmail}
             placeholder="your@email.com"
             placeholderTextColor={palette.textMuted}
             style={styles.input}
+            textContentType="emailAddress"
             value={email}
           />
 

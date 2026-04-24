@@ -23,7 +23,8 @@ class Product(BaseModel):
     compare_at_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    is_best_seller = db.Column(db.Boolean, default=False)
+    is_best_seller: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
     stock_quantity: Mapped[int] = mapped_column(nullable=False, default=0)
 
     category = relationship("Category", back_populates="products")

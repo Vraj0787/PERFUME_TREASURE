@@ -13,6 +13,7 @@ from .routes.cart import cart_bp
 from .routes.categories import categories_bp
 from .routes.checkout import checkout_bp
 from .routes.orders import orders_bp
+from .routes.payments import payments_bp
 from .routes.products import products_bp
 
 
@@ -112,6 +113,7 @@ def register_blueprints(app):
     app.register_blueprint(addresses_bp, url_prefix="/api/addresses")
     app.register_blueprint(checkout_bp, url_prefix="/api/checkout")
     app.register_blueprint(orders_bp, url_prefix="/api/orders")
+    app.register_blueprint(payments_bp, url_prefix="/api/payments")
 
 
 def register_error_handlers(app):

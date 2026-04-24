@@ -195,10 +195,8 @@ function App() {
   const initialRouteName =
     !isHydratingAuth && currentUser ? 'Home' : 'Login';
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor={palette.black} />
-      <NavigationContainer theme={navigationTheme}>
+  const appNavigation = (
+    <NavigationContainer theme={navigationTheme}>
         <Stack.Navigator
           key={initialRouteName}
           initialRouteName={initialRouteName}
@@ -285,6 +283,7 @@ function App() {
                 {...props}
                 onCartUpdated={updateCartCountFromSnapshot}
                 onLoyaltyEarned={handleLoyaltyEarned}
+                stripeEnabled={false}
               />
             )}
           </Stack.Screen>
@@ -300,9 +299,23 @@ function App() {
             )}
           </Stack.Screen>
           <Stack.Screen name="Review" component={ReviewScreen} />
-          <Stack.Screen name="AccountDescription" component={AccountDescriptionScreen} />
+          <Stack.Screen name="AccountDescription">
+            {props => (
+              <AccountDescriptionScreen
+                {...props}
+                currentUser={currentUser}
+                onUserUpdated={setCurrentUser}
+              />
+            )}
+          </Stack.Screen>
         </Stack.Navigator>
-      </NavigationContainer>
+    </NavigationContainer>
+  );
+
+  return (
+    <SafeAreaProvider>
+      <StatusBar barStyle="light-content" backgroundColor={palette.black} />
+      {appNavigation}
     </SafeAreaProvider>
   );
 }

@@ -1,5 +1,6 @@
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from flask_jwt_extended import jwt_required
+import stripe
 
 from ..extensions import db
 from ..models.address import Address
@@ -47,7 +48,8 @@ def create_checkout():
 
     address_id = payload.get("address_id")
     discount_code = (payload.get("discount_code") or "").strip() or None
-    payment_method = (payload.get("payment_method") or "cash_on_delivery").strip()
+    payment_method = (payload.get("payment_method") or "manual_review").strip()
+    payment_intent_id = (payload.get("payment_intent_id") or "").strip() or None
 
     address = Address.query.filter_by(id=address_id, user_id=user.id).first() if address_id else None
     if not address:
@@ -68,11 +70,40 @@ def create_checkout():
                 400,
             )
 
+    order_status = "pending"
+    payment_status = "pending"
+    transaction_reference = None
+
+    if payment_method == "stripe":
+        if not payment_intent_id:
+            return error_response("payment_intent_id is required for Stripe payments", 400)
+        if not current_app.config.get("STRIPE_SECRET_KEY"):
+            return error_response("Stripe is not configured for this environment", 503)
+
+        stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+        if payment_intent.get("status") != "succeeded":
+            return error_response("Stripe payment has not been completed", 400)
+
+        amount_received = int(payment_intent.get("amount_received") or payment_intent.get("amount") or 0)
+        expected_amount = int(round(float(totals["total_amount"]) * 100))
+        if amount_received != expected_amount:
+            return error_response("Stripe payment amount does not match the order total", 400)
+
+        existing_order = Order.query.filter_by(transaction_reference=payment_intent_id).first()
+        if existing_order:
+            return success_response(serialize_order(existing_order), "Order already exists")
+
+        order_status = "confirmed"
+        payment_status = "paid"
+        transaction_reference = payment_intent_id
+
     order = Order(
         user_id=user.id,
         address_id=address.id,
-        status="confirmed",
-        payment_status="pending",
+        status=order_status,
+        payment_status=payment_status,
         subtotal=totals["subtotal"],
         discount_amount=totals["discount_amount"],
         shipping_amount=totals["shipping_amount"],
@@ -80,6 +111,7 @@ def create_checkout():
         total_amount=totals["total_amount"],
         points_earned=int(totals["discounted_subtotal"]),
         payment_method=payment_method,
+        transaction_reference=transaction_reference,
         discount_code=totals["discount_code"],
     )
     db.session.add(order)

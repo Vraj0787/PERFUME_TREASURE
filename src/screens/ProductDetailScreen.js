@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import ScreenNavActions from '../components/ScreenNavActions';
 import {palette} from '../theme';
 
 function ProductDetailScreen({
@@ -77,9 +78,11 @@ function ProductDetailScreen({
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => navigation.goBack()}>
-              <Text style={styles.backText}>Back</Text>
-            </Pressable>
+            <ScreenNavActions
+              navigation={navigation}
+              color={palette.goldSoft}
+              style={styles.navActions}
+            />
             <View style={styles.headerActions}>
               <Pressable
                 onPress={() => navigation.navigate('Cart')}
@@ -133,7 +136,7 @@ function ProductDetailScreen({
               <Text style={styles.benefitText}>In stock, ready to ship</Text>
               <Text style={styles.benefitText}>Customer satisfaction</Text>
               <Text style={styles.benefitText}>Quality assurance</Text>
-              <Text style={styles.benefitText}>Secure payments</Text>
+              <Text style={styles.benefitText}>Secure checkout</Text>
             </View>
 
             <Pressable
@@ -236,8 +239,11 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
+  },
+  navActions: {
+    marginBottom: 0,
   },
   headerActions: {
     flexDirection: 'row',
@@ -413,12 +419,14 @@ const styles = StyleSheet.create({
   secondaryButton: {
     height: 54,
     borderRadius: 14,
-    backgroundColor: '#5b2fe3',
+    backgroundColor: palette.gold,
+    borderWidth: 1,
+    borderColor: '#b78f34',
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryButtonText: {
-    color: palette.white,
+    color: palette.black,
     fontSize: 16,
     fontWeight: '700',
   },

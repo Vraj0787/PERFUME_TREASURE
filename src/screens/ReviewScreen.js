@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 
+import ScreenNavActions from '../components/ScreenNavActions';
 import {
   fetchProductReviews,
   fetchRecentReviews,
@@ -99,9 +100,7 @@ function ReviewScreen({navigation, route}) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back</Text>
-        </Pressable>
+        <ScreenNavActions navigation={navigation} color={palette.gold} />
 
         <Text style={styles.eyebrow}>{product ? 'PRODUCT REVIEW' : 'COMMUNITY REVIEWS'}</Text>
         <Text style={styles.title}>{screenTitle}</Text>

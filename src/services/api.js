@@ -1,8 +1,12 @@
 import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
-const API_BASE_URL = `http://${API_HOST}:5001/api`;
+const DEV_API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
+const DEV_API_BASE_URL = `http://${DEV_API_HOST}:5001/api`;
+const PRODUCTION_API_BASE_URL = 'https://api.perfumetreasure.net/api';
+const API_BASE_URL = __DEV__ ? DEV_API_BASE_URL : PRODUCTION_API_BASE_URL;
+const MEDIA_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
+const PRODUCT_IMAGE_FALLBACK = `${MEDIA_BASE_URL}/media/perfume-treasure-logo.png`;
 const AUTH_TOKEN_KEY = 'perfume_treasure.auth_token';
 let authToken = '';
 
@@ -124,6 +128,19 @@ export async function fetchCurrentUser() {
   return response.data;
 }
 
+export async function updateCurrentUser({fullName, email, phone}) {
+  const response = await request('/auth/me', {
+    method: 'PATCH',
+    body: JSON.stringify({
+      full_name: fullName,
+      email,
+      phone,
+    }),
+  });
+
+  return response.data;
+}
+
 export async function fetchCart() {
   const response = await request('/cart');
   return (
@@ -207,10 +224,28 @@ export async function fetchCheckoutQuote({addressId, discountCode}) {
   );
 }
 
+export async function fetchStripeConfig() {
+  const response = await request('/payments/config');
+  return response.data;
+}
+
+export async function createStripePaymentSheet({addressId, discountCode}) {
+  const response = await request('/payments/payment-sheet', {
+    method: 'POST',
+    body: JSON.stringify({
+      address_id: addressId,
+      discount_code: discountCode || '',
+    }),
+  });
+
+  return response.data;
+}
+
 export async function createCheckout({
   addressId,
-  paymentMethod = 'cash_on_delivery',
+  paymentMethod = 'manual_review',
   discountCode,
+  paymentIntentId,
 }) {
   const response = await request('/checkout', {
     method: 'POST',
@@ -218,6 +253,7 @@ export async function createCheckout({
       address_id: addressId,
       payment_method: paymentMethod,
       discount_code: discountCode || '',
+      payment_intent_id: paymentIntentId || '',
     }),
   });
 
@@ -263,7 +299,7 @@ function mapProduct(product) {
     image:
       product.image ||
       product.images?.[0]?.image_url ||
-      'https://via.placeholder.com/400x400.png?text=Perfume+Treasure',
+      PRODUCT_IMAGE_FALLBACK,
     images: product.images || [],
     subtitle: product.subtitle,
     description: product.description,

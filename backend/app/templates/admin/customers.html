@@ -44,6 +44,9 @@
             <td>{{ customer.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
             <td class="actions">
               <a class="button" href="{{ url_for('admin.customer_detail', customer_id=customer.id) }}">View Details</a>
+              <form class="inline-form" method="post" action="{{ url_for('admin.delete_customer', customer_id=customer.id) }}" onsubmit="return confirm('Delete this customer account and all related data?');">
+                <button type="submit" class="danger">Delete</button>
+              </form>
             </td>
           </tr>
         {% endfor %}

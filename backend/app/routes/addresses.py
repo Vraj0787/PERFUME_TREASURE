@@ -55,7 +55,7 @@ def _validate_address(address):
     if address.country.lower() not in VALID_COUNTRIES:
         issues.append(f"Country '{address.country}' is not a recognized country name. Please check the spelling.")
     
-    # Construct full address string
+    # Construct full address string for best-effort geocoding only.
     full_address = f"{address.line1}"
     if address.line2:
         full_address += f", {address.line2}"
@@ -78,38 +78,21 @@ def _validate_address(address):
         response.raise_for_status()
         data = response.json()
         
-        if not data:
-                issues.append("The address could not be found on the map. Please verify the street address, city, and postal code.")
-        else:
-            # Get the parsed address from the result
+        if data:
+            # Treat geocoding as advisory so real addresses are not rejected over
+            # formatting differences between providers.
             result = data[0]
             parsed = result.get("address", {})
-            
-            # Check key components
-            # Check country
             geocoded_country = parsed.get("country", "").lower()
             entered_country = address.country.lower()
-            if geocoded_country and entered_country not in geocoded_country and geocoded_country not in entered_country:
-                    issues.append(f"The country '{address.country}' does not match the location found. The geocoded country is '{parsed.get('country', 'unknown')}'.")
-            
-            # Check city
-            geocoded_city = parsed.get("city", parsed.get("town", parsed.get("village", ""))).lower()
-            entered_city = address.city.lower()
-            if geocoded_city and entered_city not in geocoded_city and geocoded_city not in entered_city:
-                    issues.append(f"The city '{address.city}' was not found in the location. The geocoded city is '{geocoded_city.title()}'.")
-        
-            # Check postal code
-            geocoded_postal = parsed.get("postcode", "")
-            entered_postal = address.postal_code
-            if geocoded_postal and geocoded_postal != entered_postal:
-                issues.append(f"The postal code '{address.postal_code}' does not match the location. The geocoded postal code is '{geocoded_postal}'.")
-        
-            # Check state/province
-            if address.state:
-                geocoded_state = parsed.get("state", parsed.get("province", "")).lower()
-                entered_state = address.state.lower()
-                if geocoded_state and entered_state not in geocoded_state and geocoded_state not in entered_state:
-                    issues.append(f"The state/province '{address.state}' does not match the location. The geocoded state is '{geocoded_state.title()}'.")
+            if (
+                geocoded_country
+                and entered_country not in geocoded_country
+                and geocoded_country not in entered_country
+            ):
+                issues.append(
+                    f"Country '{address.country}' does not match the recognized location."
+                )
         
         if issues:
             return {"valid": False, "message": "Address validation issues: " + "; ".join(issues)}
