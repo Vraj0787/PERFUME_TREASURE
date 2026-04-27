@@ -34,8 +34,21 @@ def create_app(config_class=Config):
         return jsonify({"status": "ok"})
 
     @app.get("/media/<path:filename>")
-    def media_file(filename):
-        return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+def media_file(filename):
+    from flask import send_file
+    from PIL import Image
+    import io
+
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+    if filename.lower().endswith(".webp"):
+        img = Image.open(filepath).convert("RGB")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+        return send_file(buf, mimetype="image/jpeg")
+
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
     return app
 

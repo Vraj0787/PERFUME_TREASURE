@@ -193,7 +193,11 @@ function ProductListScreen({navigation, route, isFavorited, onToggleFavorite}) {
                 styles.productCard,
                 pressed ? styles.productCardPressed : null,
               ]}>
-              <Image source={{uri: product.image}} style={styles.productImage} />
+              <Image
+  source={{uri: product.image}}
+  style={styles.productImage}
+  resizeMode="cover"
+/>
               <View style={styles.productInfo}>
                 <View style={styles.productInfoRow}>
                   <View style={styles.productTextWrap}>

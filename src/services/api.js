@@ -289,7 +289,9 @@ export async function submitProductReview(slug, payload) {
 }
 
 function mapProduct(product) {
+  console.log('RAW product.image:', product.image, 'images:', JSON.stringify(product.images));
   return {
+    id: product.id,
     id: product.id,
     name: product.name,
     category: product.category?.name || 'Shop',
